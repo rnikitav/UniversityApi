@@ -17,7 +17,7 @@ class SaveFiles
     {
         $fileService = (new FileService($model))->disk('private');
         $saved = [];
-        $attachments = $model->attachments ?? [];
+        $attachments = method_exists($model, 'getAttachments') ? $model->getAttachments() : [];
         foreach ($attachments as $attachment) {
             if ($attachment instanceof UploadedFile) {
                 try {

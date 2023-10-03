@@ -2,10 +2,7 @@
 
 namespace App\Models\Accelerator;
 
-use App\Events\FileDeleting;
-use App\Models\File;
 use App\Models\User\User;
-use App\Services\SaveFiles;
 use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,9 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
@@ -28,6 +23,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $date_end
  * @property integer $user_id
  * @property string $status_id
+ * @property Carbon $created_at
  *
  * @property Collection $files
  * @property Collection $controlPoints
@@ -52,10 +48,7 @@ class Accelerator extends Model
         'published_at',
         'date_end_accepting',
         'date_end',
-
-        // Вспомогательные поля. Не относятся к самой модели
-        'control_points',
-        'attachments'
+        'user_id'
     ];
 
     protected $casts = [
@@ -64,28 +57,7 @@ class Accelerator extends Model
         'date_end' => 'date',
     ];
 
-
-    public ?array $savingControlPoints;
-
-    public static function boot()
-    {
-        parent::boot();
-
-        static::saving(function(self $instance) {
-            $instance->status_id = AcceleratorStatus::notPublished();
-            $instance->savingControlPoints = Arr::pull($instance->attributes, 'control_points');
-            $instance->attachments = Arr::pull($instance->attributes, 'files');
-        });
-        static::saved(function(self $instance) {
-            SaveFiles::save($instance);
-        });
-        static::deleting(function (self $instance) {
-            foreach ($instance->files as $file) {
-                FileDeleting::dispatch($file);
-                $file->delete();
-            }
-        });
-    }
+    protected array $savingControlPoints;
 
     public function controlPoints(): HasMany
     {
@@ -100,5 +72,15 @@ class Accelerator extends Model
     public function status(): HasOne
     {
         return $this->hasOne(AcceleratorStatus::class, 'id', 'status_id');
+    }
+
+    public function setControlPoints($points)
+    {
+        $this->savingControlPoints = $points;
+    }
+
+    public function getControlPoints(): array
+    {
+        return $this->savingControlPoints;
     }
 }

@@ -5,6 +5,10 @@ namespace App\Http\Requests\Accelerator;
 use App\Rules\Helpers;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @property array $control_points
+ * @property array $files
+ */
 class Create extends FormRequest
 {
     public function authorize(): bool
@@ -22,8 +26,7 @@ class Create extends FormRequest
             'date_end' => Helpers::$requiredDate,
             'control_points' => Helpers::$requiredArray,
             'control_points.*.name' => Helpers::$requiredString255,
-            'control_points.*.date_completion' => Helpers::$filledDate,
-            'control_points.*.days_completion' => 'integer|required_without:control_points.*.date_completion',
+            'control_points.*.date_completion' => Helpers::$requiredDate,
             'control_points.*.max_score' => 'required|integer|max:65535',
             'files' => Helpers::$filledArray,
             'files.*' => Helpers::$requiredFile20mb

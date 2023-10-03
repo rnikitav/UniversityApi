@@ -2,21 +2,18 @@
 
 namespace App\Http\Controllers\Accelerator;
 
-use App\Exceptions\Inner\InvalidDatabaseSetException;
-use App\Exceptions\Inner\InvalidDataSetException;
-use App\Exceptions\ServerErrorException;
+use App\Exceptions\OperationNotPermittedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Accelerator\Create as CreateRequest;
-use App\Http\Resources\Accelerator\AcceleratorShortCollection;
+use App\Http\Requests\Accelerator\Update as UpdateRequest;
 use App\Http\Resources\Accelerator\Accelerator as AcceleratorResource;
-use App\Repositories\Accelerator\Accelerator as AcceleratorRepository;
+use App\Http\Resources\Accelerator\AcceleratorShortCollection;
 use App\Models\Accelerator\Accelerator as AcceleratorModel;
+use App\Repositories\Accelerator\Accelerator as AcceleratorRepository;
+use App\Utils\DB as DBUtils;
 use App\Utils\Helpers;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class AcceleratorController extends Controller
@@ -50,20 +47,17 @@ class AcceleratorController extends Controller
         $data = $request->only(Helpers::keysRules($request));
         $data['user_id'] = $request->user()->id;
 
-        DB::beginTransaction();
+        $new = DBUtils::inTransaction(function () use ($data) {
+            /** @var AcceleratorModel $new */
+            $new = AcceleratorModel::factory()
+                ->make()
+                ->fill($data);
+            $new->setControlPoints($data['control_points'] ?? []);
+            $new->setAttachments($data['files'] ?? []);
+            $new->save();
 
-        try {
-            $new = AcceleratorModel::factory()->create($data);
-            DB::commit();
-        } catch (Exception $exception) {
-            DB::rollBack();
-
-            $channel = $exception instanceof InvalidDatabaseSetException ? 'database' : config('logging.default');
-            $data = $exception instanceof InvalidDataSetException ? $exception->getData() : [];
-            Log::channel($channel)->error($exception->getMessage(), $data);
-
-            throw new ServerErrorException();
-        }
+            return $new;
+        });
 
         return response(new AcceleratorResource($new->refresh()));
     }
@@ -74,13 +68,25 @@ class AcceleratorController extends Controller
         return response(new AcceleratorResource($item));
     }
 
-    /*
-    public function update(PermissionEditRequest $request, int $id): Response
+    /**
+     * @throws Throwable
+     */
+    public function update(UpdateRequest $request, int $id): Response
     {
+        /** @var AcceleratorModel $item */
         $item = $this->acceleratorRepository->byIdOr404($id);
-        $item->update($request->only(Helpers::keysRules($request)));
 
-        return response(new AcceleratorResource($item));
+        if ($request->user()->isNot($item->user)) {
+            throw new OperationNotPermittedException();
+        }
+
+        $data = $request->only(Helpers::keysRules($request));
+
+        DBUtils::inTransaction(function () use ($data, $item) {
+            $item->setControlPoints($data['control_points'] ?? []);
+            $item->update($data);
+        });
+
+        return response(new AcceleratorResource($item->refresh()));
     }
-    */
 }
