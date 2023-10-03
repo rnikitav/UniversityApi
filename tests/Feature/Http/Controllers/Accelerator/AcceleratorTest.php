@@ -87,9 +87,15 @@ class AcceleratorTest extends TestCase
         parent::setUp();
         $this->seed();
         $this->userAdmin = UserModel::first();
-        $this->acceleratorTest = AcceleratorGenerator::createWithPoint($this->userAdmin);
+        $this->acceleratorTest = AcceleratorGenerator::createFull($this->userAdmin);
 
         $this->acceleratorRepository = app()->make(AcceleratorRepository::class);
+    }
+
+    protected function tearDown(): void
+    {
+        $this->clearTestDirectory();
+        parent::tearDown();
     }
 
     protected function getRoute(int $id = null): string
