@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\HasApiTokens;
@@ -15,9 +14,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property integer $id
- * @property string $email
+ * @property string $login
  * @property string $confirm_token
- * @property Carbon $email_verified_at
  *
  * @property Collection $roles
  *
@@ -32,19 +30,15 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
-        'email',
+        'login',
         'password',
         "confirm_token",
-        "email_verified_at"
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
+        "confirm_token",
     ];
 
     public function setPassword(string $password): void
@@ -55,5 +49,10 @@ class User extends Authenticatable
     public function clearConfirmToken(): void
     {
         $this->update(['confirm_token' => null]);
+    }
+
+    public function findForPassport(string $login): User
+    {
+        return $this->where('login', $login)->first();
     }
 }

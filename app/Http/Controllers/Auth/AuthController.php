@@ -24,7 +24,7 @@ class AuthController extends Controller
 
     public function forgot(ForgotRequest $request): Response
     {
-        $user = $this->userRepository->byEmail($request->email);
+        $user = $this->userRepository->byLogin($request->email);
         if (!$user) {
             throw new AuthUserNotFoundException();
         }

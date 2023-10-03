@@ -23,9 +23,9 @@ class User extends AbstractRepository
         return $this->model->permission($permission)->get();
     }
 
-    public function byEmail(string $email): ?UserModel
+    public function byLogin(string $login): ?UserModel
     {
-        return $this->model->where('email', $email)->get()->first();
+        return $this->model->where('login', $login)->get()->first();
     }
 
     public function byConfirmToken(string $token): ?UserModel
