@@ -11,4 +11,5 @@ php artisan db:seed
 php artisan key:generate
 php artisan passport:keys --force
 php artisan passport:client --password
+php artisan storage:link
 ```
