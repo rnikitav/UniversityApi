@@ -12,6 +12,9 @@ class DatabaseSeeder extends Seeder
             PermissionsSeeder::class,
             UserSeeder::class,
             AcceleratorStatusSeeder::class,
+            AcceleratorCaseStatusSeeder::class,
+            AcceleratorCaseRoleSeeder::class,
+            AcceleratorCaseParticipationSeeder::class,
         ]);
     }
 }
