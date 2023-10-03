@@ -13,15 +13,15 @@ class AcceleratorFactory extends Factory
         return [];
     }
 
-    public function mock(): AcceleratorFactory
+    public function mock(array $default = []): AcceleratorFactory
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes) => array_merge($default, [
             'name' => fake()->name(),
             'description' => fake()->text(),
             'published_at' => fake()->date(),
             'date_end_accepting' => fake()->date(),
             'date_end' => fake()->date(),
             'status_id' => AcceleratorStatus::notPublished(),
-        ]);
+        ]));
     }
 }

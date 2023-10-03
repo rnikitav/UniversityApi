@@ -57,7 +57,7 @@ class Accelerator extends Model
         'date_end' => 'date',
     ];
 
-    protected array $savingControlPoints;
+    protected array $savingControlPoints = [];
 
     public function controlPoints(): HasMany
     {

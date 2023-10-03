@@ -27,7 +27,7 @@ class Create extends FormRequest
             'control_points' => Helpers::$requiredArray,
             'control_points.*.name' => Helpers::$requiredString255,
             'control_points.*.date_completion' => Helpers::$requiredDate,
-            'control_points.*.max_score' => 'required|integer|max:65535',
+            'control_points.*.max_score' => 'required|integer|between:1,65535',
             'files' => Helpers::$filledArray,
             'files.*' => Helpers::$requiredFile20mb
         ];
