@@ -18,11 +18,11 @@ class Update extends FormRequest
     public function rules()
     {
         return [
-            'title' => ['sometimes', 'min:5'],
-            'body' => ['sometimes'],
+            'title' => Helpers::$filledString255,
+            'body' => Helpers::$filledString,
             'img_preview' => Helpers::$sometimesFile2mbWebP,
             'img' => Helpers::$sometimesFile2mbWebP,
-            'published_at' => ['sometimes', 'date'],
+            'published_at' => Helpers::$filledDate,
         ];
     }
 }

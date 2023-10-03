@@ -56,7 +56,7 @@ class NewsController extends Controller
         return response(new NewsResource($new->refresh()));
     }
 
-    public function show($id): Response
+    public function show(int $id): Response
     {
         $news = $this->newsRepository->byIdOr404($id);
         return response(new NewsResource($news));
@@ -68,7 +68,7 @@ class NewsController extends Controller
     public function update(Update $request, $id): Response
     {
         $news = $this->newsRepository->byIdOr404($id);
-        $data = $request->validated();
+        $data = $request->only(Helpers::keysRules($request));
 
 
         $new = DBUtils::inTransaction(function () use ($data, $news) {

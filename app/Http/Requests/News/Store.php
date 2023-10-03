@@ -26,11 +26,11 @@ class Store extends FormRequest
     public function rules()
     {
         return [
-            'title' => ['required' , 'min:5'],
-            'body' => ['required'],
+            'title' => Helpers::$requiredString255,
+            'body' => Helpers::$requiredString,
             'img_preview' => Helpers::$requiredFile2mbWebP,
             'img' => Helpers::$requiredFile2mbWebP,
-            'published_at' => ['sometimes', 'date'],
+            'published_at' => Helpers::$filledDate,
         ];
     }
 }

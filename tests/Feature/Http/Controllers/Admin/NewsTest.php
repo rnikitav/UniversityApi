@@ -27,7 +27,13 @@ class NewsTest extends TestCase
         'title',
         'body',
         'slug',
-        'files',
+        'files' =>[
+        '*' => [
+            'category',
+            'path',
+            'original_name',
+        ]
+    ],
         'published_at',
         'created_at',
         'updated_at',
@@ -47,7 +53,7 @@ class NewsTest extends TestCase
 
         $this->userAdmin = UserModel::first();
         $this->userNoAdmin = UserGenerator::createVerified();
-        Storage::fake('private');
+        Storage::fake('testing');
         $file = UploadedFile::fake()->create('file.webp');
         $this->minimalCreateData['img'] = $file;
         $this->minimalCreateData['img_preview'] = $file;
