@@ -3,27 +3,15 @@
 namespace App\Http\Requests\News;
 
 use App\Rules\Helpers;
-use Carbon\Carbon;
-use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * @property string $title
- * @property string $body
- * @property string $desc
- * @property string $img
- * @property Carbon $created_at
- */
-class Store extends FormRequest
+class Store extends CommonRequestHandler
 {
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'title' => Helpers::$requiredString255,

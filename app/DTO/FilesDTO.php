@@ -17,12 +17,8 @@ class FilesDTO
         $this->category = $category;
     }
 
-    public static function createDtoFromArrayData(UploadedFile $file, $key): FilesDTO
+    public static function createDtoFromArrayData(UploadedFile $file, $category): FilesDTO
     {
-        $category = 'attachments';
-        if ($key && is_string($key)){
-            $category = explode('_', $key)[1]?? 'attachments';
-        }
         return new self($file, $category);
 
     }

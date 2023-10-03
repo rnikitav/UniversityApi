@@ -82,7 +82,7 @@ class FileService
 
              $this->attach($fileData);
         } catch (Exception $exception) {
-            Storage::delete($path);
+            Storage::disk($this->disk)->delete($path);
             throw new InvalidDatabaseSetException($exception->getMessage());
         }
 

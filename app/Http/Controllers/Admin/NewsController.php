@@ -11,9 +11,9 @@ use App\Models\News\News;
 use App\Models\News\News as NewsModel;
 use App\Repositories\News\NewsRepository;
 use App\Utils\DB as DBUtils;
-use App\Utils\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Throwable;
 
 class NewsController extends Controller
 {
@@ -39,16 +39,17 @@ class NewsController extends Controller
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function store(Store $request): Response
     {
-        $data = $request->only(Helpers::keysRules($request));
+        $data = $request->prepareData();
 
         $new = DBUtils::inTransaction(function () use ($data) {
             $new = NewsModel::factory()
                 ->make()
                 ->fill($data);
+            $new->setAttachments($data['files']);
             $new->save();
             return $new;
         });
@@ -63,12 +64,12 @@ class NewsController extends Controller
     }
 
     /**
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function update(Update $request, $id): Response
     {
         $news = $this->newsRepository->byIdOr404($id);
-        $data = $request->only(Helpers::keysRules($request));
+        $data = $request->prepareData();
 
 
         $new = DBUtils::inTransaction(function () use ($data, $news) {

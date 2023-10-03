@@ -2,18 +2,17 @@
 
 namespace Database\Factories\News;
 
+use App\Models\News\News;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Http\UploadedFile;
-use Storage;
 use function fake;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\News\News>
+ * @extends Factory<News>
  */
 class NewsFactory extends Factory
 {
 
-    public function definition()
+    public function definition(): array
     {
         return [];
     }

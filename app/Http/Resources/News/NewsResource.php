@@ -5,7 +5,12 @@ namespace App\Http\Resources\News;
 use App\Http\Resources\File\File as FileResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 use App\Utils\Resource as ResourceHelpers;
+use App\Models\News\News as NewsModel;
 
+/**
+ * @package App\Http\Resources
+ * @property NewsModel $resource
+ */
 class NewsResource extends JsonResource
 {
 

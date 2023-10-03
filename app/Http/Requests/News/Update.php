@@ -3,19 +3,15 @@
 namespace App\Http\Requests\News;
 
 use App\Rules\Helpers;
-use Illuminate\Foundation\Http\FormRequest;
 
-class Update extends FormRequest
+class Update extends CommonRequestHandler
 {
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function rules()
+    public function rules(): array
     {
         return [
             'title' => Helpers::$filledString255,

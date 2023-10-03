@@ -4,7 +4,14 @@ namespace App\Http\Resources\News;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Support\Collection;
+use App\Models\News\News as NewsModel;
 
+/**
+ * @package App\Http\Resources
+ * @property Collection $collection
+ * @property CursorPaginator|Collection<NewsModel> $resource
+ */
 class NewsCollectionResource extends ResourceCollection
 {
 
