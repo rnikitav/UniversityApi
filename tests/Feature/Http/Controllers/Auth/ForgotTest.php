@@ -36,6 +36,15 @@ class ForgotTest extends TestAbstract
         });
     }
 
+    public function testForgotIncorrectExternalUser()
+    {
+        $user = UserGenerator::createExternal();
+
+        $response = $this->postJson($this->url, ['email' => $user->login]);
+        $response->assertStatus(422)
+            ->assertJsonFragment(['message' =>  __('auth.user_not_found')]);
+    }
+
     public function testForgotIncorrectEmail()
     {
         UserGenerator::createVerified();

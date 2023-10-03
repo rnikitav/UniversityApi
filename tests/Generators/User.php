@@ -29,4 +29,9 @@ class User
     {
         return static::getBaseFactory($count, $data)->unverified()->create();
     }
+
+    public static function createExternal($count = null, array $data = []): UserModel | Collection
+    {
+        return static::getBaseFactory($count, $data)->external()->create();
+    }
 }

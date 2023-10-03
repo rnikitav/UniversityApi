@@ -16,6 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property integer $id
  * @property string $login
  * @property string $confirm_token
+ * @property boolean $external
  *
  * @property Collection $roles
  *
@@ -32,13 +33,17 @@ class User extends Authenticatable
     protected $fillable = [
         'login',
         'password',
-        "confirm_token",
+        'confirm_token',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
-        "confirm_token",
+        'confirm_token',
+    ];
+
+    protected $casts = [
+        'external' => 'boolean'
     ];
 
     public function setPassword(string $password): void
