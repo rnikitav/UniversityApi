@@ -8,6 +8,7 @@ use App\Http\Requests\Permissions\RolesEdit as RolesEditRequest;
 use App\Http\Resources\Permission\Role as RoleResource;
 use App\Models\Permissions\Role;
 use App\Repositories\Permissions\Roles as RolesRepository;
+use App\Utils\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
@@ -19,7 +20,7 @@ class RolesController extends Controller
     public function __construct(RolesRepository $rolesRepository, Request $request)
     {
         $this->rolesRepository = $rolesRepository;
-        if (Arr::exists(['PATCH','POST','DELETE'], $request->method())) {
+        if (in_array($request->method(), ['PATCH','POST','DELETE'])) {
             $this->middleware('permission:permissions.edit');
         } else {
             $this->middleware('permission:permissions.edit|users.edit');
@@ -50,7 +51,7 @@ class RolesController extends Controller
 
     public function update(RolesEditRequest $request, int $id): Response
     {
-        $validatedData = $request->all();
+        $validatedData = $request->only(Helpers::keysRules($request));
         /** @var Role $item */
         $item = $this->rolesRepository->byIdOr404($id);
         $item->update($validatedData);
