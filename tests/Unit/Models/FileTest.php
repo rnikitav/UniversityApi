@@ -17,6 +17,12 @@ class FileTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed();
+    }
+
     protected function tearDown(): void
     {
         $this->clearTestDirectory();

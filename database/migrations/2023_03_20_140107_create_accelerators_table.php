@@ -35,6 +35,14 @@ return new class extends Migration
                 ->comment('Владелец акселератора');
 
             $table->timestamps();
+
+            $table->foreign('status_id')
+                ->references('id')
+                ->on('accelerator_statuses');
+
+            $table->foreign('user_id')
+                ->references('id')
+                ->on('users');
         });
     }
 

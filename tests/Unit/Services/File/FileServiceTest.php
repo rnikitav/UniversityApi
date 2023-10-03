@@ -28,6 +28,7 @@ class FileServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        $this->seed();
 
         $user = User::createVerified();
         $this->accelerator = Accelerator::create($user);
