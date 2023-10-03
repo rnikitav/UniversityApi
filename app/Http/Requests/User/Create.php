@@ -21,7 +21,7 @@ class Create extends AbstractUserRequest
             'last_name' => Helpers::$filledString255,
             'patronymic' => Helpers::$filledString255,
             'roles' => 'filled|array',
-            'roles.*.id' => 'required|exists:roles,id'
+            'roles.*.id' => 'required|integer|exists:roles,id'
         ];
     }
 }

@@ -15,9 +15,11 @@ class UserSeeder extends Seeder
         if (!User::all()->count()) {
             /** @var UserFactory $userFactory */
             $userFactory = User::factory();
+            /** @var User $userAdmin */
             $userAdmin = $userFactory->create([
                 'login' => 'admin@admin.ru',
-                'password' => Hash::make('admin')
+                'password' => Hash::make('admin'),
+                'main_data' => ['email' => 'admin@admin.ru']
             ]);
             $userAdmin->givePermissionTo(
                 Permission::getPermissionAdministrator(),
