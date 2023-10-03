@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\DeleteOldFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -25,7 +26,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 class File extends Model
 {
-    use HasFactory;
+    use HasFactory, DeleteOldFiles;
 
     protected $table = 'files';
     protected $fillable = [

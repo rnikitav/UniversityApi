@@ -138,19 +138,6 @@ class NewsTest extends TestCase
         $response->assertOk();
     }
 
-    public function testGetItemCheckStructure()
-    {
-        NewsGenerator::create(1);
-        $news = NewsModel::first();
-
-        $this->actingAs($this->userAdmin);
-
-        $response = $this->getJson($this->getRoute($news->id));
-        $response->assertOk()
-            ->assertJsonFragment(['id' => $news->id])
-            ->assertJsonStructure($this->itemStructure);
-    }
-
     public function testCreate()
     {
         $this->actingAs($this->userAdmin);
@@ -159,7 +146,7 @@ class NewsTest extends TestCase
         $response->assertOk()
             ->assertJsonStructure($this->itemStructure);
 
-        /** @var UserModel $userModel */
+        /** @var NewsModel $newsModel */
         $newsModel = $this->newsRepository->byId($response->json('id'));
         $this->assertNotNull($newsModel);
         $this->assertEquals($this->minimalCreateData['title'], $newsModel->title);

@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Collection;
  *
  * @method static $this first()
  * @method static $this create(array $attributes = [])
+ * @method $this deleteFiles()
  */
 class News extends Model
 {
@@ -40,5 +41,10 @@ class News extends Model
         return SlugOptions::create()
             ->generateSlugsFrom('title')
             ->saveSlugsTo('slug');
+    }
+
+    public function needDeleteOldFiles(): bool
+    {
+        return true;
     }
 }

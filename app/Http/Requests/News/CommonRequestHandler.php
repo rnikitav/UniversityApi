@@ -16,6 +16,7 @@ class CommonRequestHandler extends FormRequest
     public function prepareData(): array
     {
         $data = $this->only(UtilsHelpers::keysRules($this));
+        $data['files'] = [];
         foreach ($data as $key => $value){
             if ($value instanceof UploadedFile){
                 $category = self::DICTIONARY_FILE_CATEGORY[$key]?? 'attachments';

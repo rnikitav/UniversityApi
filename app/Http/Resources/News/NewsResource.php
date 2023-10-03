@@ -21,7 +21,7 @@ class NewsResource extends JsonResource
             'title' => $this->resource->title,
             'slug' => $this->resource->slug,
             'body' => $this->resource->body,
-            'published_at' => ResourceHelpers::formatDate($this->resource->published_at)?? '',
+            'published_at' => ResourceHelpers::formatDate($this->resource->published_at),
             'created_at' => ResourceHelpers::formatDate($this->resource->created_at),
             'updated_at' => ResourceHelpers::formatDate($this->resource->updated_at),
             'files' => FileResource::collection($this->resource->files),

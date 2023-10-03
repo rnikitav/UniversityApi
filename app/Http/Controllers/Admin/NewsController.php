@@ -46,6 +46,7 @@ class NewsController extends Controller
         $data = $request->prepareData();
 
         $new = DBUtils::inTransaction(function () use ($data) {
+            /** @var NewsModel $new */
             $new = NewsModel::factory()
                 ->make()
                 ->fill($data);
@@ -66,13 +67,13 @@ class NewsController extends Controller
     /**
      * @throws Throwable
      */
-    public function update(Update $request, $id): Response
+    public function update(Update $request, int $id): Response
     {
+        /** @var NewsModel $news */
         $news = $this->newsRepository->byIdOr404($id);
         $data = $request->prepareData();
-
-
         $new = DBUtils::inTransaction(function () use ($data, $news) {
+            $news->setAttachments($data['files']);
             $news->update($data);
             return $news;
         });

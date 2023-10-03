@@ -16,4 +16,6 @@ class Helpers
     public static string $requiredArray = 'required|array';
 
     public static string $requiredFile20mb = 'required|file|max:20480';
+    public static string $requiredFile2mbWebP = 'required|file|mimes:webp|max:2048';
+    public static string $sometimesFile2mbWebP = 'sometimes|file|mimes:webp|max:2048';
 }
