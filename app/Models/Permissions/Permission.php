@@ -25,6 +25,7 @@ class Permission extends PermissionVendor
         'permissions.edit' => ['preview' => 'Редактирование ролей и разрешений', 'guard' => 'api'],
         'users.edit' => ['preview' => 'Редактирование пользователей', 'guard' => 'api'],
         'docs.view' => ['preview' => 'Просмотр документации API', 'guard' => 'web'],
+        'news.edit' => ['preview' => 'Редактирование новостей', 'guard' => 'api'],
         'student' => ['preview' => 'Обучающийся', 'guard' => 'api'],
     ];
 
