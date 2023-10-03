@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AcceleratorCaseParticipationSeeder::class,
             AcceleratorCaseEventStatusSeeder::class,
             AcceleratorCaseEventTypeSeeder::class,
+            AcceleratorCaseSolutionStatusSeeder::class,
         ]);
     }
 }

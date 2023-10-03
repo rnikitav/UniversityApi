@@ -35,4 +35,11 @@ class Accelerator
             ->has(FileModel::factory()->mock(), 'files')
             ->create();
     }
+
+    public static function createWithControlPoint(User $user, int $count = null, array $data = []): AcceleratorModel | Collection
+    {
+        return static::getBaseFactory($user, $count, $data)
+            ->has(AcceleratorControlPointModel::factory()->mock(), 'controlPoints')
+            ->create();
+    }
 }
