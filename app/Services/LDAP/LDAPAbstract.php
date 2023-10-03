@@ -20,14 +20,16 @@ class LDAPAbstract
     {
         $userModel = $this->userRepository->byLogin($data['login']);
 
-        if ($userModel) {
-            return $userModel;
+        if (!$userModel) {
+            /** @var UserFactory $userFactory */
+            $userFactory = UserModel::factory();
+
+            /** @var UserModel $user */
+            $userModel = $userFactory->external()->create(['login' => $data['login']]);
         }
 
-        /** @var UserFactory $userFactory */
-        $userFactory = UserModel::factory();
+        $userModel->givePermissionTo('student');
 
-        /** @var UserModel $user */
-        return $userFactory->external()->create(['login' => $data['login']]);
+        return $userModel;
     }
 }

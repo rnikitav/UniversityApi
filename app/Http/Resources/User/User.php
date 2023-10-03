@@ -24,18 +24,25 @@ class User extends JsonResource
 
     private function getRoles(): Collection
     {
-        if ($this->resource->roles->count()) {
-            return $this->resource->roles;
-        }
+        $roles = $this->resource->roles->count() ? $this->resource->roles : new Collection();
+        $systemRole = [
+            'id' => null,
+            'name' => '_system',
+            'permissions' => []
+        ];
 
         if ($this->resource->hasPermissionTo('administrator')) {
-            return collect([(object)[
-                'id' => null,
-                'name' => '_system',
-                'permissions' => [Permission::findByName('administrator')]
-            ]]);
+            $systemRole['permissions'][] = Permission::findByName('administrator');
         }
 
-        return new Collection();
+        if ($this->resource->hasPermissionTo('student')) {
+            $systemRole['permissions'][] = Permission::findByName('student');
+        }
+
+        if (count($systemRole['permissions'])) {
+            $roles->push((object)$systemRole);
+        }
+
+        return $roles;
     }
 }
