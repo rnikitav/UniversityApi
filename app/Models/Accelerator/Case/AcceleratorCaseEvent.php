@@ -80,4 +80,28 @@ class AcceleratorCaseEvent extends Model
     {
         return $this->hasOne(User::class, 'id', 'moderator_id');
     }
+
+    public function apply(int $newOwnerId = null): void
+    {
+        if ($this->type->id == AcceleratorCaseEventType::enter()) {
+            if ($this->case->participants->doesntContain('user_id', $this->participant->id)) {
+                $this->case->participants()->create([
+                    'user_id' => $this->participant->id,
+                    'role_id' => AcceleratorCaseRole::participant(),
+                ]);
+            }
+        } elseif ($this->type->id == AcceleratorCaseEventType::exit()) {
+            /** @var AcceleratorCaseParticipant $participant */
+            $participant = $this->case->participants->firstWhere('user_id', $this->participant->id);
+            if ($participant) {
+                $participant->delete();
+
+                if ($participant->role->id == AcceleratorCaseRole::owner()) {
+                    $this->case->participants()
+                        ->where('user_id', $newOwnerId)
+                        ->update(['role_id' => AcceleratorCaseRole::owner()]);
+                }
+            }
+        }
+    }
 }

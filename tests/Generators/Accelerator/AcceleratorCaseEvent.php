@@ -21,9 +21,18 @@ class AcceleratorCaseEvent
         return $factory;
     }
 
-    public static function create(AcceleratorCaseModel $case, int $count = null, array $data = []): AcceleratorCaseEventModel | Collection
+    public static function createEnter(AcceleratorCaseModel $case, int $count = null, array $data = []): AcceleratorCaseEventModel | Collection
     {
-        return static::getBaseFactory($case, $count, $data)->case($case->id)
+        return static::getBaseFactory($case, $count, $data)
+            ->case($case->id)
+            ->create();
+    }
+
+    public static function createExit(AcceleratorCaseModel $case, int $count = null, array $data = []): AcceleratorCaseEventModel | Collection
+    {
+        return static::getBaseFactory($case, $count, $data)
+            ->case($case->id)
+            ->exit()
             ->create();
     }
 }

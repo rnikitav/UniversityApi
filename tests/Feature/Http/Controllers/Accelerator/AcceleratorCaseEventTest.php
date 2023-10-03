@@ -3,14 +3,13 @@
 namespace Tests\Feature\Http\Controllers\Accelerator;
 
 use App\Mail\Accelerator\EventCreate as EventCreateMail;
-use App\Mail\Accelerator\CaseUpdateStatus as CaseUpdateStatusMail;
 
 use App\Models\Accelerator\Accelerator as AcceleratorModel;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseEventStatus;
 use App\Models\Accelerator\Case\AcceleratorCaseEventType;
+use App\Models\Accelerator\Case\AcceleratorCaseParticipant;
 use App\Models\Accelerator\Case\AcceleratorCaseRole;
-use App\Models\Accelerator\Case\AcceleratorCaseStatus;
 use App\Models\Permissions\Permission;
 use App\Models\User\User as UserModel;
 
@@ -102,10 +101,21 @@ class AcceleratorCaseEventTest extends TestCase
         return $data;
     }
 
+    protected function getUpdateData(string $status = null, int $newOwnerId = null): array
+    {
+        $data = [
+            'status' => $status ?? AcceleratorCaseEventStatus::approved(),
+        ];
+        if ($newOwnerId) {
+            $data['new_owner'] = $newOwnerId;
+        }
+        return $data;
+    }
+
     public function testGetList()
     {
         $count = 5;
-        AcceleratorCaseEventGenerator::create($this->caseTest, $count);
+        AcceleratorCaseEventGenerator::createEnter($this->caseTest, $count);
 
         $this->actingAs($this->userAdmin);
 
@@ -117,7 +127,7 @@ class AcceleratorCaseEventTest extends TestCase
 
     public function testGetListCheckPermission()
     {
-        AcceleratorCaseEventGenerator::create($this->caseTest);
+        AcceleratorCaseEventGenerator::createEnter($this->caseTest);
         $user = UserGenerator::createVerified();
         $this->actingAs($user);
 
@@ -127,7 +137,7 @@ class AcceleratorCaseEventTest extends TestCase
 
     public function testGetItemCheckStructure()
     {
-        $event = AcceleratorCaseEventGenerator::create($this->caseTest);
+        $event = AcceleratorCaseEventGenerator::createEnter($this->caseTest);
 
         $this->actingAs($this->userAdmin);
 
@@ -139,7 +149,7 @@ class AcceleratorCaseEventTest extends TestCase
 
     public function testGetItemCheckPermission()
     {
-        $event = AcceleratorCaseEventGenerator::create($this->caseTest);
+        $event = AcceleratorCaseEventGenerator::createEnter($this->caseTest);
         $user = UserGenerator::createVerified();
         $this->actingAs($user);
 
@@ -234,146 +244,134 @@ class AcceleratorCaseEventTest extends TestCase
         $response->assertUnprocessable();
     }
 
-/*    public function testUpdateCheckStatus()
+    public function testUpdateCheckPermissionOwnerCase()
     {
-        $case = AcceleratorCaseGenerator::create($this->acceleratorTest);
+        $event = AcceleratorCaseEventGenerator::createEnter($this->caseTest);
+        $eventExit = AcceleratorCaseEventGenerator::createExit($this->caseTest);
 
-        $this->actingAs($this->userAdmin);
-
-        $response = $this->patchJson($this->getRoute(id: $case->id));
-        $response->assertForbidden();
-
-        $case->status_id = AcceleratorCaseStatus::sentRevision();
-        $case->save();
-
-        $response = $this->patchJson($this->getRoute(id: $case->id));
-        $response->assertOk();
-    }
-
-    public function testUpdateCheckOwner()
-    {
-        $case = AcceleratorCaseGenerator::createWithStatus($this->acceleratorTest, AcceleratorCaseStatus::sentRevision());
         $user = UserGenerator::createVerified();
-
         $this->actingAs($user);
 
-        $response = $this->patchJson($this->getRoute(id: $case->id));
+        $response = $this->patchJson($this->getRoute(id: $event->id), $this->getUpdateData());
         $response->assertForbidden();
 
-        $case->owner->user_id = $user->id;
-        $case->owner->save();
+        $this->caseTest->owner->update(['user_id' => $user->id]);
+        $response = $this->patchJson($this->getRoute(id: $eventExit->id), $this->getUpdateData());
+        $response->assertForbidden();
 
-        $response = $this->patchJson($this->getRoute(id: $case->id));
+        $response = $this->patchJson($this->getRoute(id: $event->id), $this->getUpdateData());
+        $response->assertOk();
+
+        $response = $this->patchJson($this->getRoute(id: $event->id), $this->getUpdateData());
+        $response->assertForbidden();
+    }
+
+    public function testUpdateCheckPermissionOwnerAccelerator()
+    {
+        $user = UserGenerator::createVerified();
+        $this->caseTest->owner()->update(['user_id' => $user->id]);
+
+        $event = AcceleratorCaseEventGenerator::createEnter($this->caseTest);
+
+        $this->actingAs($this->userAdmin);
+
+        $response = $this->patchJson($this->getRoute(id: $event->id), $this->getUpdateData());
+        $response->assertOk();
+
+        $response = $this->patchJson($this->getRoute(id: $event->id), $this->getUpdateData());
+        $response->assertForbidden();
+    }
+
+    public function testUpdateCheckNewOwner()
+    {
+        $user = UserGenerator::createVerified();
+        $this->caseTest->owner()->update(['user_id' => $user->id]);
+
+        $eventExit = AcceleratorCaseEventGenerator::createExit($this->caseTest);
+
+        $this->actingAs($this->userAdmin);
+
+        $response = $this->patchJson($this->getRoute(id: $eventExit->id), $this->getUpdateData());
+        $response->assertUnprocessable();
+
+        $response = $this->patchJson($this->getRoute(id: $eventExit->id), $this->getUpdateData(newOwnerId: $user->id));
         $response->assertOk();
     }
 
-    public function testUpdateMinimal()
+    public function testUpdateEnter()
     {
-        $case = AcceleratorCaseGenerator::createWithStatus($this->acceleratorTest, AcceleratorCaseStatus::sentRevision());
-        $this->actingAs($this->userAdmin);
-
-        $response = $this->patchJson($this->getRoute(id: $case->id));
-        $response->assertOk();
-    }
-
-    public function testUpdate()
-    {
-        $case = AcceleratorCaseGenerator::createWithStatus($this->acceleratorTest, AcceleratorCaseStatus::sentRevision());
+        $user = UserGenerator::createVerified();
+        $event = AcceleratorCaseEventGenerator::createEnter($this->caseTest);
+        $event->update(['participant_id' => $user->id]);
 
         $this->actingAs($this->userAdmin);
 
-        $expect = array_merge(Arr::except($this->minimalCreateData, 'participation'), ['id' => $case->id]);
-
-        $response = $this->patchJson($this->getRoute(id: $case->id), $this->minimalCreateData);
+        $response = $this->patchJson($this->getRoute(id: $event->id), $this->getUpdateData(AcceleratorCaseEventStatus::rejected()));
         $response->assertOk()
-            ->assertJsonFragment($expect);
+            ->assertJsonStructure($this->itemStructure);
 
-        $this->assertEquals($response->json('participation.id'), $this->minimalCreateData['participation']);
+        $this->assertEquals(AcceleratorCaseEventStatus::rejected(), $event->refresh()->status->id);
+        $this->assertTrue(
+            $this->caseTest->refresh()
+                ->participants->doesntContain('user_id', $user->id)
+        );
+
+        $event->update(['status_id' => AcceleratorCaseEventStatus::submitted()]);
+
+        $response = $this->patchJson($this->getRoute(id: $event->id), $this->getUpdateData());
+        $response->assertOk()
+            ->assertJsonStructure($this->itemStructure);
+
+        $this->assertEquals(AcceleratorCaseEventStatus::approved(), $event->refresh()->status->id);
+        $this->assertTrue($this->userAdmin->is($event->refresh()->moderator));
+        $this->assertTrue(
+            $this->caseTest->refresh()
+                ->participants->contains('user_id', $user->id)
+        );
     }
 
-    public function testUpdateStatusCheckOwner()
+    public function testUpdateExit()
     {
-        $case = AcceleratorCaseGenerator::create($this->acceleratorTest);
         $user = UserGenerator::createVerified();
+        $this->caseTest->participants()->create(['user_id' => $user->id, 'role_id' => AcceleratorCaseRole::participant()]);
 
-        $case->owner->user_id = $user->id;
-        $case->owner->save();
-
-        $this->actingAs($user);
-
-        $dataSubmitted = [
-            'status' => AcceleratorCaseStatus::submitted()
-        ];
-        $dataApproved = [
-            'status' => AcceleratorCaseStatus::approved()
-        ];
-
-        $response = $this->patchJson($this->getRouteChangeStatus(id: $case->id), $dataSubmitted);
-        $response->assertForbidden();
-
-        $case->status_id = AcceleratorCaseStatus::sentRevision();
-        $case->save();
-
-        $response = $this->patchJson($this->getRouteChangeStatus(id: $case->id), $dataApproved);
-        $response->assertForbidden();
-
-        $response = $this->patchJson($this->getRouteChangeStatus(id: $case->id), $dataSubmitted);
-        $response->assertOk();
-    }
-
-    public function testUpdateStatusCheckModerator()
-    {
-        $case = AcceleratorCaseGenerator::create($this->acceleratorTest);
-        $user = UserGenerator::createVerified();
-
-        $case->owner->user_id = $user->id;
-        $case->owner->save();
+        $eventExit = AcceleratorCaseEventGenerator::createExit($this->caseTest);
+        $eventExit->update(['participant_id' => $user->id]);
 
         $this->actingAs($this->userAdmin);
 
-        $dataSubmitted = [
-            'status' => AcceleratorCaseStatus::submitted()
-        ];
-        $dataApproved = [
-            'status' => AcceleratorCaseStatus::approved()
-        ];
+        $response = $this->patchJson($this->getRoute(id: $eventExit->id), $this->getUpdateData());
+        $response->assertOk()
+            ->assertJsonStructure($this->itemStructure);
 
-        $response = $this->patchJson($this->getRouteChangeStatus(id: $case->id), $dataSubmitted);
-        $response->assertForbidden();
-
-        $response = $this->patchJson($this->getRouteChangeStatus(id: $case->id), $dataApproved);
-        $response->assertOk();
+        $this->assertEquals(AcceleratorCaseEventStatus::approved(), $eventExit->refresh()->status->id);
+        $this->assertTrue($this->userAdmin->is($eventExit->refresh()->moderator));
+        $this->assertTrue(
+            $this->caseTest->refresh()
+                ->participants->doesntContain('user_id', $user->id)
+        );
     }
 
-    public function testUpdateStatus()
+    public function testUpdateExitOwner()
     {
-        Mail::fake();
-        $case = AcceleratorCaseGenerator::create($this->acceleratorTest);
         $user = UserGenerator::createVerified();
-
-        $case->owner->user_id = $user->id;
-        $case->owner->save();
+        $this->caseTest->participants()->create(['user_id' => $user->id, 'role_id' => AcceleratorCaseRole::participant()]);
 
         $this->actingAs($this->userAdmin);
 
-        $newStatus = AcceleratorCaseStatus::approved();
-        $message = 'Case is approved';
-        $data = [
-            'status' => $newStatus,
-            'message' => $message,
-        ];
+        $eventExitOwner = AcceleratorCaseEventGenerator::createExit($this->caseTest);
 
-        $response = $this->patchJson($this->getRouteChangeStatus(id: $case->id), $data);
-        $response->assertOk();
+        $response = $this->patchJson($this->getRoute(id: $eventExitOwner->id), $this->getUpdateData(newOwnerId: $user->id));
+        $response->assertOk()
+            ->assertJsonStructure($this->itemStructure);
 
-        $case->refresh();
-        $this->assertEquals($newStatus, $case->status_id);
-        $this->assertEquals(1, $case->messages->count());
-        $this->assertEquals($message, $case->messages->first()?->message);
+        $this->assertEquals(AcceleratorCaseEventStatus::approved(), $eventExitOwner->refresh()->status->id);
+        $this->assertTrue($this->userAdmin->is($eventExitOwner->refresh()->moderator));
 
-        Mail::assertSent(function(CaseUpdateStatusMail $mail) use ($case) {
-            return $mail->case->is($case);
-        });
+        /** @var AcceleratorCaseParticipant $participant */
+        $this->caseTest->refresh();
+        $participant = $this->caseTest->participants->firstWhere('user_id', $user->id);
+        $this->assertEquals(AcceleratorCaseRole::owner(), $participant->role->id);
+        $this->assertTrue($this->caseTest->participants->doesntContain('user_id', $this->userAdmin->id));
     }
-    */
 }

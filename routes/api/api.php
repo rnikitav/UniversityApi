@@ -14,5 +14,5 @@ Route::middleware('auth:api')->group(function () {
     Route::patch('accelerators/{id}/cases/{case_id}/change-status', [AcceleratorCaseController::class, 'updateStatus']);
 
     Route::apiResource('accelerators/{id}/cases/{case_id}/events', AcceleratorCaseEventController::class)
-        ->parameters(['events' => 'event_id']);
+        ->except('destroy')->parameters(['events' => 'event_id']);
 });

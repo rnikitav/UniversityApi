@@ -20,6 +20,13 @@ class AcceleratorCaseEventFactory extends Factory
         ]);
     }
 
+    public function exit(): AcceleratorCaseEventFactory
+    {
+        return $this->state(fn (array $attributes) => [
+            'type_id' => AcceleratorCaseEventType::exit(),
+        ]);
+    }
+
     public function mock(int $userId): AcceleratorCaseEventFactory
     {
         return $this->state(fn (array $attributes) => [
