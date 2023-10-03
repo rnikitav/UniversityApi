@@ -2,8 +2,8 @@
 
 namespace App\Http\Resources\Accelerator;
 
+use App\Http\Resources\BaseSimple as BaseSimpleResource;
 use App\Models\Accelerator\Accelerator as AcceleratorModel;
-use App\Http\Resources\Accelerator\Status as AcceleratorStatusResource;
 use App\Http\Resources\Accelerator\ControlPoint as AcceleratorControlPointResource;
 use App\Http\Resources\File\File as FileResource;
 use App\Utils\Resource as ResourceHelpers;
@@ -24,7 +24,7 @@ class Accelerator extends JsonResource
             'published_at' => ResourceHelpers::formatDate($this->resource->published_at),
             'date_end_accepting' => ResourceHelpers::formatDate($this->resource->date_end_accepting),
             'date_end' => ResourceHelpers::formatDate($this->resource->date_end),
-            'status' => new AcceleratorStatusResource($this->resource->status),
+            'status' => new BaseSimpleResource($this->resource->status),
             'attachments' => FileResource::collection($this->resource->files),
             'control_points' => AcceleratorControlPointResource::collection($this->resource->controlPoints),
         ];
