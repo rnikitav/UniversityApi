@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Permissions\PermissionEdit as PermissionEditRequest;
 use App\Http\Resources\Permission\Permission as PermissionResource;
 use App\Repositories\Permissions\Permissions as PermissionsRepository;
+use App\Utils\Helpers;
 use Illuminate\Http\Response;
 
 class PermissionsController extends Controller
@@ -32,12 +33,8 @@ class PermissionsController extends Controller
 
     public function update(PermissionEditRequest $request, int $id): Response
     {
-        $validatedData = $request->all();
-        if (array_key_exists('name', $validatedData)){
-            unset($validatedData['name']);
-        }
         $item = $this->permissionsRepository->byIdOr404($id);
-        $item->update($validatedData);
+        $item->update($request->only(Helpers::keysRules($request)));
 
         return response(new PermissionResource($item));
     }

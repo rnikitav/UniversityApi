@@ -2,6 +2,8 @@
 
 namespace App\Models\Permissions;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Spatie\Permission\Models\Permission as PermissionVendor;
 
 /**
@@ -10,6 +12,11 @@ use Spatie\Permission\Models\Permission as PermissionVendor;
  * @property string $name
  * @property string $guard_name
  * @property string $preview
+ *
+ * @method static $this first()
+ *
+ * @mixin Builder
+ * @mixin QueryBuilder
  */
 class Permission extends PermissionVendor
 {
