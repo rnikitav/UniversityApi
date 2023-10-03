@@ -5,7 +5,7 @@ namespace Tests\Generators\Accelerator;
 use App\Models\Accelerator\Accelerator as AcceleratorModel;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseParticipant as AcceleratorCaseParticipantModel;
-use App\Models\Accelerator\Case\AcceleratorCaseParticipant;
+use App\Models\Accelerator\Case\AcceleratorCaseEvent as AcceleratorCaseEventModel;
 use App\Models\File as FileModel;
 use Database\Factories\Accelerator\Case\AcceleratorCaseFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -44,6 +44,14 @@ class AcceleratorCase
         return static::getBaseFactory()->accelerator($accelerator->id)
             ->has(AcceleratorCaseParticipantModel::factory()->mock($accelerator->user->id), 'participants')
             ->has(FileModel::factory()->mock(), 'files')
+            ->create();
+    }
+
+    public static function createWithEvent(AcceleratorModel $accelerator): AcceleratorCaseModel | Collection
+    {
+        return static::getBaseFactory()->accelerator($accelerator->id)
+            ->has(AcceleratorCaseParticipantModel::factory()->mock($accelerator->user->id), 'participants')
+            ->has(AcceleratorCaseEventModel::factory()->mock($accelerator->user->id), 'events')
             ->create();
     }
 }
