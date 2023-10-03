@@ -33,9 +33,7 @@ class AuthController extends Controller
         }
 
         $user->update(['confirm_token' => Str::random(40)]);
-        if (!is_null($user->mainData->email)) {
-            Mail::to($user->mainData->email)->send(new ForgotMail($user->confirm_token));
-        }
+        Mail::to($request->email)->send(new ForgotMail($user->confirm_token));
 
         return response(['success' => true]);
     }
