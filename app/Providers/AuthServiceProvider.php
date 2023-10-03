@@ -7,6 +7,7 @@ use App\Services\LDAP\Contracts\LDAPService;
 use App\Services\LDAP\Grant\PasswordActiveDirectoryGrant;
 use App\Services\LDAP\LDAP;
 use App\Services\LDAP\LDAPMock;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -32,24 +33,29 @@ class AuthServiceProvider extends ServiceProvider
 
             return $app->make(LDAPMock::class);
         });
+
+        $this->app->resolving(AuthorizationServer::class, function ($authorizationServer) {
+            $authorizationServer->enableGrantType(
+                $this->makePasswordActiveDirectoryGrant(), Passport::tokensExpireIn()
+            );
+        });
     }
 
-    public function boot(AuthorizationServer $authorizationServer)
+    public function boot()
     {
+        $this->registerPolicies();
+
         Passport::tokensExpireIn(now()->addDay());
         Passport::refreshTokensExpireIn(now()->addDays(30));
-
-        $authorizationServer->enableGrantType(
-            $this->makePasswordActiveDirectoryGrant(), Passport::tokensExpireIn()
-        );
-
-        $this->registerPolicies();
 
         Gate::before(function (User $user) {
             return $user->hasPermissionTo('administrator') ? true : null;
         });
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     protected function makePasswordActiveDirectoryGrant(): PasswordActiveDirectoryGrant
     {
         $grant = new PasswordActiveDirectoryGrant(
