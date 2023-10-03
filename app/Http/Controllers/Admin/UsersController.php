@@ -2,18 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Factories\User as UserFactory;
+use App\Exceptions\ServerErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Create as UserCreateRequest;
 use App\Http\Requests\User\Update as UserUpdateRequest;
 use App\Http\Resources\User\User as UserResource;
 use App\Http\Resources\User\UserShortCollection;
-use App\Models\User\User;
+use App\Models\User\User as UserModel;
 use App\Repositories\User\User as UserRepository;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class UsersController extends Controller
 {
@@ -36,12 +39,24 @@ class UsersController extends Controller
         return response(new UserShortCollection($items));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function store(UserCreateRequest $request): Response
     {
-        $new = UserFactory::fromCreateRequest($request);
-        $this->syncRoles($new, $request->all());
+        DB::beginTransaction();
 
-        return response(new UserResource($new));
+        try {
+            $new = UserModel::factory()->create($request->prepareDataForCreateUser());
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::channel('database')->error($exception->getMessage());
+
+            throw new ServerErrorException();
+        }
+
+        return response(new UserResource($new->refresh()));
     }
 
     public function show(int $id): Response
@@ -50,18 +65,32 @@ class UsersController extends Controller
         return response(new UserResource($item));
     }
 
+    /**
+     * @throws Throwable
+     */
     public function update(UserUpdateRequest $request, int $id): Response
     {
-        $validatedData = $request->all();
-        if (!empty($validatedData['password'])) {
-            $validatedData['password'] = Hash::make($validatedData['password']);
-        }
-        /** @var User $item */
-        $item = $this->userRepository->byIdOr404($id);
-        $item->update($validatedData);
-        $this->syncRoles($item, $validatedData);
+        /** @var UserModel $user */
+        $user = $this->userRepository->byIdOr404($id);
+        $preparedData = $request->prepareDataForCreateUser();
 
-        return response(new UserResource($item));
+        if ($user->external) {
+            Arr::forget($preparedData, ['login', 'password']);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $user->update($preparedData);
+            DB::commit();
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::channel('database')->error($exception->getMessage());
+
+            throw new ServerErrorException();
+        }
+
+        return response(new UserResource($user->refresh()));
     }
 
     public function destroy(int $id): Response
@@ -70,18 +99,5 @@ class UsersController extends Controller
         $item->delete();
 
         return response(['status' => true]);
-    }
-
-    /**
-     * Синхронизация ролей пользователя
-     * @param User $user
-     * @param array $requestData
-     */
-    protected function syncRoles(User $user, array $requestData)
-    {
-        if (array_key_exists('roles', $requestData)) {
-            $roles = Arr::pluck($requestData['roles'], 'id');
-            $user->syncRoles($roles);
-        }
     }
 }

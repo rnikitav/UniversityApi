@@ -2,11 +2,15 @@
 
 namespace App\Models\User;
 
+use App\Services\User\MainData as MainDataService;
+use App\Services\User\SyncRoles as SyncRolesService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\HasApiTokens;
@@ -19,6 +23,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property boolean $external
  *
  * @property Collection $roles
+ * @property UserMainData $mainData
+ * @property array $mainDataForUpdate
  *
  * @method static $this create(array $attributes = [])
  * @method static $this first()
@@ -34,6 +40,11 @@ class User extends Authenticatable
         'login',
         'password',
         'confirm_token',
+        'external',
+
+        // Вспомогательные поля. Не относятся к самой модели
+        'main_data',
+        'sync_roles'
     ];
 
     protected $hidden = [
@@ -45,6 +56,23 @@ class User extends Authenticatable
     protected $casts = [
         'external' => 'boolean'
     ];
+
+    public ?array $mainDataForUpdate;
+    public ?array $rolesForUpdate;
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function(self $instance) {
+            $instance->mainDataForUpdate = Arr::pull($instance->attributes, 'main_data');
+            $instance->rolesForUpdate = Arr::pull($instance->attributes, 'sync_roles');
+        });
+        static::saved(function(self $instance) {
+            MainDataService::update($instance);
+            SyncRolesService::update($instance);
+        });
+    }
 
     public function setPassword(string $password): void
     {
@@ -59,5 +87,10 @@ class User extends Authenticatable
     public function findForPassport(string $login): User
     {
         return $this->where('login', $login)->first();
+    }
+
+    public function mainData(): HasOne
+    {
+        return $this->hasOne(UserMainData::class, 'user_id', 'id');
     }
 }

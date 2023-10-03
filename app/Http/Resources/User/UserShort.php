@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\User;
 
+use App\Http\Resources\User\MainData as MainDataResource;
 use App\Models\User\User as UserModel;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -15,6 +16,7 @@ class UserShort extends JsonResource
     {
         return [
             'id' => $this->resource->id,
+            'main_data' => new MainDataResource($this->resource->mainData),
         ];
     }
 }

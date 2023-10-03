@@ -2,24 +2,27 @@
 
 namespace App\Http\Requests\User;
 
-use App\Http\Requests\Auth\Registration;
+use App\Rules\Helpers;
+use App\Rules\PasswordRule;
 
 /**
+ * @property string $email
+ * @property string $password
  * @property array $roles
  */
-class Create extends Registration
+class Create extends AbstractUserRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
-        return array_merge(parent::rules(), [
+        return [
+            'email' => 'required|email|unique:users,login',
+            'password' => ['required', 'confirmed', new PasswordRule()],
+            'first_name' => Helpers::$filledString255,
+            'last_name' => Helpers::$filledString255,
+            'patronymic' => Helpers::$filledString255,
             'roles' => 'filled|array',
             'roles.*.id' => 'required|exists:roles,id'
-        ]);
+        ];
     }
 }
 

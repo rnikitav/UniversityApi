@@ -3,6 +3,7 @@
 namespace App\Http\Resources\User;
 
 use App\Http\Resources\Permission\Role as RoleResource;
+use App\Http\Resources\User\MainData as MainDataResource;
 use App\Models\Permissions\Permission;
 use App\Models\User\User as UserModel;
 use App\Models\Permissions\Permission as PermissionModel;
@@ -19,6 +20,7 @@ class User extends JsonResource
     {
         return [
             'id' => $this->resource->id,
+            'main_data' => new MainDataResource($this->resource->mainData),
             'roles' => RoleResource::collection($this->getRoles()),
         ];
     }
