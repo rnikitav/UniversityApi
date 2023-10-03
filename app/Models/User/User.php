@@ -2,7 +2,6 @@
 
 namespace App\Models\User;
 
-use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -30,7 +29,7 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, MustVerifyEmail;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'email',

@@ -45,18 +45,6 @@ class ForgotTest extends TestAbstract
             ->assertJsonFragment(['message' =>  __('auth.user_not_found')]);
     }
 
-    public function testForgotNotVerified()
-    {
-        $user = UserGenerator::createUnVerified();
-
-        $response = $this->postJson($this->url, ['email' => $user->email]);
-        $response->assertStatus(403)
-            ->assertJsonFragment([
-                'message' =>  __('auth.email_not_verified', ['email' => $user->email]),
-                'status_code' => 'not_verified'
-            ]);
-    }
-
     /**
      * @dataProvider incorrectEmailValues
      */
