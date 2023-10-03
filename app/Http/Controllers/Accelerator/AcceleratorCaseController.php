@@ -3,39 +3,30 @@
 namespace App\Http\Controllers\Accelerator;
 
 use App\Exceptions\OperationNotPermittedException;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Accelerator\Case\Create as CreateRequest;
 use App\Http\Requests\Accelerator\Case\Update as UpdateRequest;
 use App\Http\Requests\Accelerator\Case\UpdateStatus as UpdateStatusRequest;
 use App\Http\Resources\Accelerator\AcceleratorCase as AcceleratorCaseResource;
 use App\Http\Resources\Accelerator\AcceleratorCaseShort as AcceleratorCaseShortResource;
-use App\Models\Accelerator\Accelerator as AcceleratorModel;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseRole;
 use App\Models\Accelerator\Case\AcceleratorCaseStatus;
 use App\Models\Permissions\Permission;
-use App\Models\User\User as UserModel;
 use App\Repositories\Accelerator\Accelerator as AcceleratorRepository;
 use App\Utils\DB as DBUtils;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Throwable;
 
-class AcceleratorCaseController extends Controller
+class AcceleratorCaseController extends AbstractAcceleratorCaseController
 {
-    protected AcceleratorRepository $acceleratorRepository;
-    protected ?AcceleratorModel $accelerator;
-    protected ?AcceleratorCaseModel $case;
-    protected ?UserModel $currentUser;
-
     public function __construct(AcceleratorRepository $acceleratorRepository, Request $request)
     {
         if ($request->method() == 'POST') {
             $this->middleware('permission:' . Permission::getPermissionStudent());
         }
 
-        $this->acceleratorRepository = $acceleratorRepository;
-        $this->currentUser = $request->user();
+        parent::__construct($acceleratorRepository, $request);
     }
 
     public function index(int $id): Response
@@ -133,26 +124,5 @@ class AcceleratorCaseController extends Controller
         });
 
         return response(new AcceleratorCaseResource($this->case));
-    }
-
-    protected function getAccelerator(int $accelerator_id): void
-    {
-        /** @noinspection PhpFieldAssignmentTypeMismatchInspection */
-        $this->accelerator = $this->acceleratorRepository->byIdOr404($accelerator_id);
-    }
-
-    protected function getAcceleratorCase(int $accelerator_id, int $case_id): void
-    {
-        $this->getAccelerator($accelerator_id);
-        $this->case = $this->acceleratorRepository->caseByIdOr404($this->accelerator, $case_id);
-    }
-
-    protected function checkOwners(): void
-    {
-        if ($this->currentUser->isNot($this->case->owner?->user)
-            && $this->currentUser->isNot($this->accelerator->user)
-        ) {
-            throw new OperationNotPermittedException();
-        }
     }
 }
