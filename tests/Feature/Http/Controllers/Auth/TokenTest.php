@@ -3,6 +3,7 @@
 namespace Tests\Feature\Http\Controllers\Auth;
 
 use App\Models\User\User as UserModel;
+use App\Repositories\User\User as UserRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Testing\TestResponse;
 use Laravel\Passport\Client as ClientModel;
@@ -15,6 +16,7 @@ use Tests\Generators\User as UserGenerator;
 class TokenTest extends TestAbstract
 {
     protected PassportClientRepository $clientRepository;
+    protected UserRepository $userRepository;
     protected ClientModel $client;
     protected UserModel $user;
     protected string $password = 'testtest';
@@ -32,6 +34,7 @@ class TokenTest extends TestAbstract
         $this->meUrl = route('user.me');
 
         $this->clientRepository = app()->make(PassportClientRepository::class);
+        $this->userRepository = app()->make(UserRepository::class);
         $this->client = $this->createClient();
 
         $this->user = UserGenerator::createVerified();
@@ -52,6 +55,20 @@ class TokenTest extends TestAbstract
             'client_id' => $this->client->id,
             'client_secret' => $this->client->getPlainSecretAttribute(),
             'username' => $this->user->login,
+            'password' => $this->password,
+            'scope' => null
+        ];
+
+        return $this->postJson($this->url, $data);
+    }
+
+    protected function sendRequestGetTokenLDAP(string $login): TestResponse
+    {
+        $data = [
+            'grant_type' => 'password_active_directory',
+            'client_id' => $this->client->id,
+            'client_secret' => $this->client->getPlainSecretAttribute(),
+            'username' => $login,
             'password' => $this->password,
             'scope' => null
         ];
@@ -84,6 +101,29 @@ class TokenTest extends TestAbstract
 
         $responseMe = $this->getJson($this->meUrl, ['Authorization' => $this->authorizationHeader]);
         $responseMe->assertOk();
+    }
+
+    public function testGetTokenLDAP()
+    {
+        $login = 'ldaptest1';
+
+        $response = $this->sendRequestGetTokenLDAP($login);
+        $response->assertOk()
+            ->assertJsonStructure(['access_token', 'refresh_token', 'expires_in', 'token_type'])
+            ->assertJsonFragment(['token_type' => 'Bearer']);
+
+        $authData = $response->json();
+        $this->authorizationHeader = $authData['token_type'] . ' ' . $authData['access_token'];
+
+        $responseMe = $this->getJson($this->meUrl, ['Authorization' => $this->authorizationHeader]);
+        $responseMe->assertOk();
+
+        $this->assertDatabaseCount('users', 3);
+
+        $userLDAP = $this->userRepository->byLogin($login);
+        $this->assertNotNull($userLDAP);
+        $this->assertTrue($userLDAP->external);
+        $this->assertTrue($userLDAP->hasPermissionTo('student'));
     }
 
     public function testRefreshToken()
@@ -155,6 +195,16 @@ class TokenTest extends TestAbstract
 
         $response->assertStatus(400)
             ->assertJsonFragment(['error' => 'invalid_request']);
+    }
+
+    public function testGetTokenIncorrectCredentialsLDAP()
+    {
+        $login = 'test';
+
+        $response = $this->sendRequestGetTokenLDAP($login);
+
+        $response->assertStatus(400)
+            ->assertJsonFragment(['error' => 'invalid_grant']);
     }
 
     public function testGetTokenIncorrectRefreshToken()
