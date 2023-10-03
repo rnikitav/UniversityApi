@@ -13,6 +13,13 @@ class AcceleratorCaseEventFactory extends Factory
         return [];
     }
 
+    public function case(int $id): AcceleratorCaseEventFactory
+    {
+        return $this->state(fn (array $attributes) => [
+            'case_id' => $id,
+        ]);
+    }
+
     public function mock(int $userId): AcceleratorCaseEventFactory
     {
         return $this->state(fn (array $attributes) => [

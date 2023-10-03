@@ -46,4 +46,15 @@ class AcceleratorTest extends TestCase
 
         $this->assertNotNull($this->acceleratorRepository->caseByIdOr404($this->acceleratorTest, $case->id));
     }
+
+    public function testGetEventByIdOr404()
+    {
+        $case = AcceleratorCaseGenerator::createWithEvent($this->acceleratorTest);
+        $event = $case->events->first();
+
+        $this->expectException(NotFoundHttpException::class);
+        $this->acceleratorRepository->eventByIdOr404($case, 0);
+
+        $this->assertNotNull($this->acceleratorRepository->eventByIdOr404($case, $event->id));
+    }
 }

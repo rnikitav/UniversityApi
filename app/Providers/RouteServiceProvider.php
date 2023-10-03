@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 class RouteServiceProvider extends ServiceProvider
 {
     public const HOME = '/docs/request-docs';
+    protected const ID_PATTERN = '^[1-9][0-9]*$';
 
     public function boot()
     {
@@ -28,8 +29,12 @@ class RouteServiceProvider extends ServiceProvider
                 ->group(base_path('routes/web.php'));
         });
 
-        Route::pattern('user_id', '^[1-9][0-9]*');
-        Route::pattern('id', '^[1-9][0-9]*');
+        Route::patterns([
+            'id' => self::ID_PATTERN,
+            'user_id' => self::ID_PATTERN,
+            'case_id' => self::ID_PATTERN,
+            'event_id' => self::ID_PATTERN,
+        ]);
     }
 
     protected function configureRateLimiting()

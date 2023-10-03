@@ -3,7 +3,8 @@
 namespace App\Repositories\Accelerator;
 
 use App\Models\Accelerator\Accelerator as AcceleratorModel;
-use App\Models\Accelerator\Case\AcceleratorCase;
+use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
+use App\Models\Accelerator\Case\AcceleratorCaseEvent as AcceleratorCaseEventModel;
 use App\Repositories\AbstractRepository;
 
 class Accelerator extends AbstractRepository
@@ -13,7 +14,7 @@ class Accelerator extends AbstractRepository
         return AcceleratorModel::class;
     }
 
-    public function caseByIdOr404(AcceleratorModel $accelerator, int $caseId): AcceleratorCase
+    public function caseByIdOr404(AcceleratorModel $accelerator, int $caseId): AcceleratorCaseModel
     {
         $case = $accelerator->cases()->where('id', $caseId)->get()->first();
         if (is_null($case)) {
@@ -21,5 +22,15 @@ class Accelerator extends AbstractRepository
         }
 
         return $case;
+    }
+
+    public function eventByIdOr404(AcceleratorCaseModel $case, int $eventId): AcceleratorCaseEventModel
+    {
+        $event = $case->events()->where('id', $eventId)->get()->first();
+        if (is_null($event)) {
+            abort(404);
+        }
+
+        return $event;
     }
 }
