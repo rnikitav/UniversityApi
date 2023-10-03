@@ -42,7 +42,7 @@ class DocsController extends Controller
         }
 
         $credentials = [
-            'email' => $request->input('login'),
+            'login' => $request->input('login'),
             'password' => $request->input('password')
         ];
 

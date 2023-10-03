@@ -22,7 +22,7 @@ class User
 
     public static function createVerified(int $count = null, array $data = []): UserModel | Collection
     {
-        return static::getBaseFactory($count, $data)->verified()->create();
+        return static::getBaseFactory($count, $data)->create();
     }
 
     public static function createUnVerified($count = null, array $data = []): UserModel | Collection

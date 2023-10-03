@@ -71,7 +71,7 @@ class DocsControllerTest extends TestCase
         $password = 'test';
         $user = $this->createUserWithViewDocs($password);
 
-        $response = $this->post($this->urlLogin, ['login' => $user->email, 'password' => $password]);
+        $response = $this->post($this->urlLogin, ['login' => $user->login, 'password' => $password]);
         $response->assertRedirect($this->url);
     }
 
@@ -80,7 +80,7 @@ class DocsControllerTest extends TestCase
         $password = 'test';
         $user = $this->createUserWithViewDocs($password);
 
-        $response = $this->post($this->urlLogin, ['login' => $user->email, 'password' => '']);
+        $response = $this->post($this->urlLogin, ['login' => $user->login, 'password' => '']);
         $response->assertRedirect($this->urlLogin);
     }
 
@@ -99,7 +99,7 @@ class DocsControllerTest extends TestCase
         $user = UserGenerator::createVerified();
         $user->setPassword($password);
 
-        $response = $this->post($this->urlLogin, ['login' => $user->email, 'password' => $password]);
+        $response = $this->post($this->urlLogin, ['login' => $user->login, 'password' => $password]);
         $response->assertRedirect($this->urlLogin);
     }
 }

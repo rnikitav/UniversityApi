@@ -23,7 +23,7 @@ class ForgotTest extends TestAbstract
         Mail::fake();
         $user = UserGenerator::createVerified();
 
-        $response = $this->postJson($this->url, ['email' => $user->email]);
+        $response = $this->postJson($this->url, ['email' => $user->login]);
         $response->assertOk()
             ->assertExactJson(['success' => true]);
 

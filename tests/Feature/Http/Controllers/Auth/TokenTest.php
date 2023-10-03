@@ -3,6 +3,7 @@
 namespace Tests\Feature\Http\Controllers\Auth;
 
 use App\Models\User\User as UserModel;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Testing\TestResponse;
 use Laravel\Passport\Client as ClientModel;
 use Laravel\Passport\ClientRepository as PassportClientRepository;
@@ -20,6 +21,9 @@ class TokenTest extends TestAbstract
     protected string $meUrl;
     protected string $authorizationHeader;
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -47,7 +51,7 @@ class TokenTest extends TestAbstract
             'grant_type' => 'password',
             'client_id' => $this->client->id,
             'client_secret' => $this->client->getPlainSecretAttribute(),
-            'username' => $this->user->email,
+            'username' => $this->user->login,
             'password' => $this->password,
             'scope' => null
         ];
@@ -108,7 +112,7 @@ class TokenTest extends TestAbstract
             'grant_type' => 'test',
             'client_id' => $this->client->id,
             'client_secret' => $this->client->getPlainSecretAttribute(),
-            'username' => $this->user->email,
+            'username' => $this->user->login,
             'password' => $this->password,
             'scope' => null
         ];
@@ -125,7 +129,7 @@ class TokenTest extends TestAbstract
             'grant_type' => 'password',
             'client_id' => 0,
             'client_secret' => '',
-            'username' => $this->user->email,
+            'username' => $this->user->login,
             'password' => $this->password,
             'scope' => null
         ];
@@ -142,7 +146,7 @@ class TokenTest extends TestAbstract
             'grant_type' => 'password',
             'client_id' => $this->client->id,
             'client_secret' => $this->client->getPlainSecretAttribute(),
-            'username' => $this->user->email,
+            'username' => $this->user->login,
             'password' => '',
             'scope' => null
         ];

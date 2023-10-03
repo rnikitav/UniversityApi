@@ -15,7 +15,6 @@ class UserShort extends JsonResource
     {
         return [
             'id' => $this->resource->id,
-            'email' => $this->resource->email,
         ];
     }
 }

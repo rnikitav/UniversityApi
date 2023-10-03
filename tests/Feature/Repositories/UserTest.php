@@ -93,10 +93,10 @@ class UserTest extends TestCase
     {
         $count = 3;
         $permission = 'users.edit';
-        $users = UserGenerator::createVerified($count);
+        $verifiedUsers = UserGenerator::createVerified($count);
         UserGenerator::createVerified($count);
 
-        foreach ($users as $user) {
+        foreach ($verifiedUsers as $user) {
             $user->givePermissionTo($permission);
         }
 
@@ -104,14 +104,14 @@ class UserTest extends TestCase
         $this->assertCount($count, $usersWithPermission);
     }
 
-    public function testGetByEmail()
+    public function testGetByLogin()
     {
         $user = UserGenerator::createVerified();
 
-        $userModel = $this->users->byEmail($user->email);
+        $userModel = $this->users->byLogin($user->login);
         $this->assertEquals($user->id, $userModel->id);
 
-        $userNotFound = $this->users->byEmail('a@mail.ru');
+        $userNotFound = $this->users->byLogin('a@mail.ru');
         $this->assertNull($userNotFound);
     }
 

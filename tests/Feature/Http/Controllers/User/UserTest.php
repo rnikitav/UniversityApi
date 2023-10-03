@@ -17,7 +17,6 @@ class UserTest extends TestCase
     protected string $table = 'users';
     protected array $responseStructure = [
         'id',
-        'email',
         'roles' => [
             '*' => [
                 'id',

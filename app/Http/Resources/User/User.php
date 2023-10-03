@@ -18,7 +18,6 @@ class User extends JsonResource
     {
         return [
             'id' => $this->resource->id,
-            'email' => $this->resource->email,
             'roles' => RoleResource::collection($this->getRoles()),
         ];
     }
