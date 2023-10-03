@@ -4,6 +4,7 @@ namespace App\Models\Accelerator\Case;
 
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -27,6 +28,8 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 class AcceleratorCaseParticipant extends Model
 {
+    use HasFactory;
+
     protected $table = 'accelerator_case_participants';
     protected $fillable = [
         'user_id',

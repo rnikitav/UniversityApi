@@ -1,6 +1,6 @@
 <?php
 
-namespace database\factories\Accelerator\Case;
+namespace Database\Factories\Accelerator\Case;
 
 use App\Models\Accelerator\Case\AcceleratorCaseParticipation;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -13,10 +13,17 @@ class AcceleratorCaseFactory extends Factory
         return [];
     }
 
-    public function grouped(): AcceleratorCaseFactory
+    public function accelerator(int $id): AcceleratorCaseFactory
     {
         return $this->state(fn (array $attributes) => [
-            'participation_id' => AcceleratorCaseParticipation::group(),
+            'accelerator_id' => $id,
+        ]);
+    }
+
+    public function status(string $id): AcceleratorCaseFactory
+    {
+        return $this->state(fn (array $attributes) => [
+            'status_id' => $id,
         ]);
     }
 
