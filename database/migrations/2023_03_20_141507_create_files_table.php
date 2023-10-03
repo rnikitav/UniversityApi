@@ -11,10 +11,10 @@ return new class extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedInteger('file_id')
+            $table->unsignedInteger('owner_id')
                 ->comment('Идентификатор данных');
 
-            $table->string('file_type', 255)
+            $table->string('owner_type', 255)
                 ->comment('Имя класса для связи');
 
             $table->string('disk', 255)

@@ -10,13 +10,15 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * @property integer $id
- * @property integer $file_id
- * @property string $file_type
+ * @property integer $owner_id
+ * @property string $owner_type
  * @property string $category
  * @property string $disk
  * @property string $path
  * @property string $original_name
  * @property string $sha256
+ *
+ * @property Model $owner
  *
  * @mixin Builder
  * @mixin QueryBuilder
@@ -34,7 +36,7 @@ class File extends Model
         'sha256'
     ];
 
-    public function file(): MorphTo
+    public function owner(): MorphTo
     {
         return $this->morphTo();
     }

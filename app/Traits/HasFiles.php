@@ -11,7 +11,7 @@ trait HasFiles
 
     public function files(): MorphMany
     {
-        return $this->morphMany(File::class, 'file');
+        return $this->morphMany(File::class, 'owner');
     }
 
     public function setAttachments(array $attachments): void
