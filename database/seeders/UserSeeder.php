@@ -19,7 +19,10 @@ class UserSeeder extends Seeder
                 'login' => 'admin@admin.ru',
                 'password' => Hash::make('admin')
             ]);
-            $userAdmin->givePermissionTo('administrator', Permission::findByName('docs.view', 'web'));
+            $userAdmin->givePermissionTo(
+                Permission::getPermissionAdministrator(),
+                Permission::findByName('docs.view', 'web')
+            );
         }
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Resources\User;
 use App\Http\Resources\Permission\Role as RoleResource;
 use App\Models\Permissions\Permission;
 use App\Models\User\User as UserModel;
+use App\Models\Permissions\Permission as PermissionModel;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Collection;
 
@@ -31,12 +32,14 @@ class User extends JsonResource
             'permissions' => []
         ];
 
-        if ($this->resource->hasPermissionTo('administrator')) {
-            $systemRole['permissions'][] = Permission::findByName('administrator');
+        $permissionAdministrator = PermissionModel::getPermissionAdministrator();
+        if ($this->resource->hasPermissionTo($permissionAdministrator)) {
+            $systemRole['permissions'][] = Permission::findByName($permissionAdministrator);
         }
 
-        if ($this->resource->hasPermissionTo('student')) {
-            $systemRole['permissions'][] = Permission::findByName('student');
+        $permissionStudent = PermissionModel::getPermissionStudent();
+        if ($this->resource->hasPermissionTo($permissionStudent)) {
+            $systemRole['permissions'][] = Permission::findByName($permissionStudent);
         }
 
         if (count($systemRole['permissions'])) {

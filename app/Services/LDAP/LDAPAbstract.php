@@ -2,6 +2,7 @@
 
 namespace App\Services\LDAP;
 
+use App\Models\Permissions\Permission as PermissionModel;
 use App\Models\User\User as UserModel;
 use App\Repositories\User\User as UserRepository;
 use Database\Factories\User\UserFactory;
@@ -28,7 +29,7 @@ class LDAPAbstract
             $userModel = $userFactory->external()->create(['login' => $data['login']]);
         }
 
-        $userModel->givePermissionTo('student');
+        $userModel->givePermissionTo(PermissionModel::getPermissionStudent());
 
         return $userModel;
     }

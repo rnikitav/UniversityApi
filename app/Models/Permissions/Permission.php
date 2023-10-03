@@ -32,4 +32,14 @@ class Permission extends PermissionVendor
     {
         return static::$list;
     }
+
+    public static function getPermissionAdministrator(): string
+    {
+        return 'administrator';
+    }
+
+    public static function getPermissionStudent(): string
+    {
+        return 'student';
+    }
 }
