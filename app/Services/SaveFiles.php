@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\FilesDTO;
 use App\Services\File\FileService;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
@@ -15,25 +16,29 @@ class SaveFiles
      */
     public static function save(Model $model): void
     {
-        $fileService = (new FileService($model))->disk('private');
+        $disk = 'private';
+        $fileService = (new FileService($model))->disk($disk);
         $saved = [];
         $attachments = method_exists($model, 'getAttachments') ? $model->getAttachments() : [];
         foreach ($attachments as $attachment) {
-            if ($attachment instanceof UploadedFile) {
-                try {
+            try {
+                if ($attachment instanceof UploadedFile) {
                     $saved[] = $fileService->save($attachment);
-                } catch (Exception $exception) {
-                    static::deleteSaved($saved);
-                    throw $exception;
+                } elseif ($attachment instanceof FilesDTO) {
+                    $fileService->category($attachment->category);
+                    $saved[] = $fileService->save($attachment->file);
                 }
+            } catch (Exception $exception) {
+                static::deleteSaved($saved, $disk);
+                throw $exception;
             }
         }
     }
 
-    protected static function deleteSaved(array $saved): void
+    protected static function deleteSaved(array $saved, string $disk): void
     {
         foreach ($saved as $path) {
-            Storage::delete($path);
+            Storage::disk($disk)->delete($path);
         }
     }
 }

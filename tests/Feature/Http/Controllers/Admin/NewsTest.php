@@ -7,7 +7,9 @@ use App\Models\News\News as NewsModel;
 use App\Repositories\News\NewsRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use Storage;
 use Tests\Generators\News as NewsGenerator;
 use Tests\Generators\User as UserGenerator;
 use Tests\TestCase;
@@ -25,7 +27,7 @@ class NewsTest extends TestCase
         'title',
         'body',
         'slug',
-        'img_preview',
+        'files',
         'published_at',
         'created_at',
         'updated_at',
@@ -33,8 +35,6 @@ class NewsTest extends TestCase
     protected array $minimalCreateData = [
         'title' => 'test title',
         'body' => '<h1>test body</h1>',
-        'img_preview' => '/img/test.img',
-        'img' => '/img/testFull.img'
     ];
 
     /**
@@ -47,6 +47,10 @@ class NewsTest extends TestCase
 
         $this->userAdmin = UserModel::first();
         $this->userNoAdmin = UserGenerator::createVerified();
+        Storage::fake('private');
+        $file = UploadedFile::fake()->create('file.webp');
+        $this->minimalCreateData['img'] = $file;
+        $this->minimalCreateData['img_preview'] = $file;
 
 
         $this->newsRepository = app()->make(NewsRepository::class);

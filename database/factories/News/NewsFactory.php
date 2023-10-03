@@ -3,6 +3,8 @@
 namespace Database\Factories\News;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Http\UploadedFile;
+use Storage;
 use function fake;
 
 /**
@@ -21,8 +23,6 @@ class NewsFactory extends Factory
             'title' => fake()->sentence(4),
             'body' => fake()->randomHtml(2,3),
             'slug' => fake()->slug,
-            'img_preview' => '/img/' . fake()->text(15) . fake()->fileExtension(),
-            'img' => '/img/' . fake()->text(15) . fake()->fileExtension(),
             'published_at' => fake()->dateTime(),
             'created_at' => fake()->dateTime(),
             'updated_at' => fake()->dateTime(),

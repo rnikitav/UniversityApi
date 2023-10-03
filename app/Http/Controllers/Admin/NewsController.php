@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exceptions\ServerErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\News\Store;
 use App\Http\Requests\News\Update;
@@ -11,11 +10,10 @@ use App\Http\Resources\News\NewsResource;
 use App\Models\News\News;
 use App\Models\News\News as NewsModel;
 use App\Repositories\News\NewsRepository;
-use Exception;
+use App\Utils\DB as DBUtils;
+use App\Utils\Helpers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class NewsController extends Controller
 {
@@ -45,18 +43,17 @@ class NewsController extends Controller
      */
     public function store(Store $request): Response
     {
-        DB::beginTransaction();
+        $data = $request->only(Helpers::keysRules($request));
 
-        try {
-            $news = NewsModel::factory()->create($request->validated());
-            DB::commit();
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::channel('database')->error($exception->getMessage());
+        $new = DBUtils::inTransaction(function () use ($data) {
+            $new = NewsModel::factory()
+                ->make()
+                ->fill($data);
+            $new->save();
+            return $new;
+        });
 
-            throw new ServerErrorException();
-        }
-        return response(new NewsResource($news->refresh()));
+        return response(new NewsResource($new->refresh()));
     }
 
     public function show($id): Response
@@ -73,19 +70,13 @@ class NewsController extends Controller
         $news = $this->newsRepository->byIdOr404($id);
         $data = $request->validated();
 
-        DB::beginTransaction();
 
-        try {
+        $new = DBUtils::inTransaction(function () use ($data, $news) {
             $news->update($data);
-            DB::commit();
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::channel('database')->error($exception->getMessage());
+            return $news;
+        });
 
-            throw new ServerErrorException();
-        }
-
-        return response(new NewsResource($news->refresh()));
+        return response(new NewsResource($new->refresh()));
     }
 
     public function destroy(int $id): Response

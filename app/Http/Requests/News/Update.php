@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\News;
 
+use App\Rules\Helpers;
 use Illuminate\Foundation\Http\FormRequest;
 
 class Update extends FormRequest
@@ -19,8 +20,8 @@ class Update extends FormRequest
         return [
             'title' => ['sometimes', 'min:5'],
             'body' => ['sometimes'],
-            'img_preview' => ['sometimes'],
-            'img' => ['sometimes'],
+            'img_preview' => Helpers::$sometimesFile2mbWebP,
+            'img' => Helpers::$sometimesFile2mbWebP,
             'published_at' => ['sometimes', 'date'],
         ];
     }

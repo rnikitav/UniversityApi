@@ -2,6 +2,7 @@
 
 namespace App\Models\News;
 
+use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Sluggable\HasSlug;
@@ -9,10 +10,13 @@ use Spatie\Sluggable\SlugOptions;
 
 class News extends Model
 {
-    use HasFactory;
-    use HasSlug;
+    use HasFactory, HasFiles, HasSlug;
 
-    protected $fillable = ['slug', 'title', 'img_preview','img', 'body', 'published_at'];
+    protected $fillable = ['slug', 'title', 'body', 'published_at'];
+
+    protected $casts = [
+        'published_at' => 'datetime'
+    ];
 
     public function getSlugOptions(): SlugOptions
     {

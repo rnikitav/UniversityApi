@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\News;
 
+use App\Rules\Helpers;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -27,8 +28,8 @@ class Store extends FormRequest
         return [
             'title' => ['required' , 'min:5'],
             'body' => ['required'],
-            'img_preview' => ['required'],
-            'img' => ['required'],
+            'img_preview' => Helpers::$requiredFile2mbWebP,
+            'img' => Helpers::$requiredFile2mbWebP,
             'published_at' => ['sometimes', 'date'],
         ];
     }

@@ -14,8 +14,6 @@ return new class extends Migration
             $table->string('title', 200);
             $table->text('body')->comment('Body news HTML');
             $table->string('slug', 200);
-            $table->string('img_preview');
-            $table->string('img');
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });
