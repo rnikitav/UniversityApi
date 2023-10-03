@@ -24,8 +24,7 @@ class FileService
         $this->model = $model;
         $this->disk = config('filesystems.default');
 
-        $arr = explode('\\', get_class($model));
-        $this->directory = Str::lower(array_pop($arr));
+        $this->directory = Str::lower(class_basename($model));
     }
 
     public function disk(string $disk): self
@@ -83,7 +82,7 @@ class FileService
 
              $this->attach($fileData);
         } catch (Exception $exception) {
-            Storage::disk($this->disk)->delete($path);
+            Storage::delete($path);
             throw new InvalidDatabaseSetException($exception->getMessage());
         }
 
