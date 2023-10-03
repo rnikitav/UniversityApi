@@ -2,14 +2,12 @@
 
 namespace App\Observers;
 
-use App\Events\FileDeleting;
 use App\Mail\Accelerator\CaseCreate as CaseCreateMail;
 use App\Mail\Accelerator\CaseUpdateStatus as CaseUpdateStatusMail;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseStatus;
 use App\Services\Accelerator\CaseMessages;
 use App\Services\Accelerator\CaseParticipants;
-use App\Services\SaveFiles;
 use Exception;
 use Illuminate\Support\Facades\Mail;
 
@@ -48,14 +46,5 @@ class AcceleratorCaseObserver
     {
         CaseParticipants::save($instance);
         CaseMessages::save($instance);
-        SaveFiles::save($instance);
-    }
-
-    public function deleting(AcceleratorCaseModel $instance): void
-    {
-        foreach ($instance->files as $file) {
-            FileDeleting::dispatch($file);
-            $file->delete();
-        }
     }
 }
