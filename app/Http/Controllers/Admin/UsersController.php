@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Exceptions\ServerErrorException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Create as UserCreateRequest;
 use App\Http\Requests\User\Update as UserUpdateRequest;
@@ -10,12 +9,10 @@ use App\Http\Resources\User\User as UserResource;
 use App\Http\Resources\User\UserShortCollection;
 use App\Models\User\User as UserModel;
 use App\Repositories\User\User as UserRepository;
-use Exception;
+use App\Utils\DB as DBUtils;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class UsersController extends Controller
@@ -44,17 +41,12 @@ class UsersController extends Controller
      */
     public function store(UserCreateRequest $request): Response
     {
-        DB::beginTransaction();
 
-        try {
-            $new = UserModel::factory()->create($request->prepareDataForCreateUser());
-            DB::commit();
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::channel('database')->error($exception->getMessage());
+        $data = $request->prepareDataForCreateUser();
 
-            throw new ServerErrorException();
-        }
+        $new = DBUtils::inTransaction(function () use ($data) {
+            return UserModel::factory()->create($data);
+        });
 
         return response(new UserResource($new->refresh()));
     }
@@ -72,23 +64,15 @@ class UsersController extends Controller
     {
         /** @var UserModel $user */
         $user = $this->userRepository->byIdOr404($id);
-        $preparedData = $request->prepareDataForCreateUser();
+        $data = $request->prepareDataForCreateUser();
 
         if ($user->external) {
-            Arr::forget($preparedData, ['login', 'password']);
+            Arr::forget($data, ['login', 'password']);
         }
 
-        DB::beginTransaction();
-
-        try {
-            $user->update($preparedData);
-            DB::commit();
-        } catch (Exception $exception) {
-            DB::rollBack();
-            Log::channel('database')->error($exception->getMessage());
-
-            throw new ServerErrorException();
-        }
+        DBUtils::inTransaction(function () use ($data, $user) {
+            $user->update($data);
+        });
 
         return response(new UserResource($user->refresh()));
     }

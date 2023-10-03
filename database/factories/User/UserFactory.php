@@ -30,10 +30,14 @@ class UserFactory extends Factory
 
     public function mock(): UserFactory
     {
-        return $this->state(fn (array $attributes) => [
-            'login' => fake()->unique()->safeEmail(),
-            'password' => Hash::make('password'),
-            'external' => false
-        ]);
+        return $this->state(function () {
+            $login = fake()->unique()->safeEmail();
+            return [
+                'login' => $login,
+                'password' => Hash::make('password'),
+                'external' => false,
+                'main_data' => ['email' => $login]
+            ];
+        });
     }
 }
