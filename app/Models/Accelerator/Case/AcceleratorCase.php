@@ -25,6 +25,7 @@ use Illuminate\Support\Collection;
  * @property AcceleratorCaseParticipation $participation
  * @property Collection $participants
  * @property Collection $files
+ * @property Collection $messages
  * @property AcceleratorCaseParticipant $owner
  *
  * @method static $this first()
@@ -47,6 +48,7 @@ class AcceleratorCase extends Model
     protected $with = ['status', 'participation', 'participants'];
 
     protected array $savingParticipants = [];
+    protected array $savingMessages = [];
 
     public function accelerator(): BelongsTo
     {
@@ -68,10 +70,20 @@ class AcceleratorCase extends Model
         return $this->hasMany(AcceleratorCaseParticipant::class, 'case_id', 'id');
     }
 
+    public function messages(): HasMany
+    {
+        return $this->hasMany(AcceleratorCaseMessage::class, 'case_id', 'id');
+    }
+
     public function owner(): HasOne
     {
         return $this->hasOne(AcceleratorCaseParticipant::class, 'case_id', 'id')
             ->where('role_id', AcceleratorCaseRole::owner());
+    }
+
+    public function canEditable(): bool
+    {
+        return $this->status->id == AcceleratorCaseStatus::sentRevision();
     }
 
     public function setParticipants(array $participants): void
@@ -82,5 +94,15 @@ class AcceleratorCase extends Model
     public function getParticipants(): array
     {
         return $this->savingParticipants;
+    }
+
+    public function setMessages(array $messages): void
+    {
+        $this->savingMessages = $messages;
+    }
+
+    public function getMessages(): array
+    {
+        return $this->savingMessages;
     }
 }

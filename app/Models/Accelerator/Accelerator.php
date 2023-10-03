@@ -3,6 +3,7 @@
 namespace App\Models\Accelerator;
 
 use App\Models\Accelerator\Case\AcceleratorCase;
+use App\Models\Accelerator\Case\AcceleratorCaseStatus;
 use App\Models\User\User;
 use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Builder;
@@ -29,6 +30,7 @@ use Illuminate\Support\Carbon;
  * @property Collection $files
  * @property Collection $controlPoints
  * @property Collection $cases
+ * @property Collection $approvedCases
  * @property User $user
  * @property AcceleratorStatus $status
  *
@@ -71,6 +73,12 @@ class Accelerator extends Model
     public function cases(): HasMany
     {
         return $this->hasMany(AcceleratorCase::class);
+    }
+
+    public function approvedCases(): HasMany
+    {
+        return $this->hasMany(AcceleratorCase::class)
+            ->where('status_id', AcceleratorCaseStatus::approved());
     }
 
     public function user(): BelongsTo

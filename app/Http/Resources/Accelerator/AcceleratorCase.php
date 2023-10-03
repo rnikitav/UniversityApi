@@ -6,6 +6,7 @@ use App\Http\Resources\File\File as FileResource;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Http\Resources\Accelerator\CaseStatus as AcceleratorCaseStatusResource;
 use App\Http\Resources\Accelerator\AcceleratorCaseParticipant as AcceleratorCaseParticipantResource;
+use App\Http\Resources\Accelerator\CaseMessage as AcceleratorCaseMessageResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -23,6 +24,7 @@ class AcceleratorCase extends JsonResource
             'status' => new AcceleratorCaseStatusResource($this->resource->status),
             'participants' => AcceleratorCaseParticipantResource::collection($this->resource->participants),
             'attachments' => FileResource::collection($this->resource->files),
+            'messages' => AcceleratorCaseMessageResource::collection($this->resource->messages),
         ];
     }
 }

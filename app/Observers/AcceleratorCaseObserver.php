@@ -4,8 +4,10 @@ namespace App\Observers;
 
 use App\Events\FileDeleting;
 use App\Mail\Accelerator\CaseCreate as CaseCreateMail;
+use App\Mail\Accelerator\CaseUpdateStatus as CaseUpdateStatusMail;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseStatus;
+use App\Services\Accelerator\CaseMessages;
 use App\Services\Accelerator\CaseParticipants;
 use App\Services\SaveFiles;
 use Exception;
@@ -22,9 +24,20 @@ class AcceleratorCaseObserver
 
     public function created(AcceleratorCaseModel $instance): void
     {
-        $ownerEmail = $instance->accelerator->user->mainData->email;
+        $ownerEmail = $instance->accelerator->user?->mainData?->email;
         if (!is_null($ownerEmail)) {
             Mail::to($ownerEmail)->send(new CaseCreateMail($instance));
+        }
+    }
+
+    public function updated(AcceleratorCaseModel $instance): void
+    {
+        $instance->refresh();
+        if (array_key_exists('status_id', $instance->getChanges())) {
+            $ownerEmail = $instance->owner?->user?->mainData?->email;
+            if (!is_null($ownerEmail)) {
+                Mail::to($ownerEmail)->send(new CaseUpdateStatusMail($instance));
+            }
         }
     }
 
@@ -34,6 +47,7 @@ class AcceleratorCaseObserver
     public function saved(AcceleratorCaseModel $instance): void
     {
         CaseParticipants::save($instance);
+        CaseMessages::save($instance);
         SaveFiles::save($instance);
     }
 
