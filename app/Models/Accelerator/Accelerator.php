@@ -2,6 +2,7 @@
 
 namespace App\Models\Accelerator;
 
+use App\Models\Accelerator\Case\AcceleratorCase;
 use App\Models\User\User;
 use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,6 +28,7 @@ use Illuminate\Support\Carbon;
  *
  * @property Collection $files
  * @property Collection $controlPoints
+ * @property Collection $cases
  * @property User $user
  * @property AcceleratorStatus $status
  *
@@ -57,11 +59,18 @@ class Accelerator extends Model
         'date_end' => 'date',
     ];
 
+    protected $with = ['status'];
+
     protected array $savingControlPoints = [];
 
     public function controlPoints(): HasMany
     {
         return $this->hasMany(AcceleratorControlPoint::class);
+    }
+
+    public function cases(): HasMany
+    {
+        return $this->hasMany(AcceleratorCase::class);
     }
 
     public function user(): BelongsTo
@@ -74,7 +83,7 @@ class Accelerator extends Model
         return $this->hasOne(AcceleratorStatus::class, 'id', 'status_id');
     }
 
-    public function setControlPoints($points)
+    public function setControlPoints(array $points): void
     {
         $this->savingControlPoints = $points;
     }
