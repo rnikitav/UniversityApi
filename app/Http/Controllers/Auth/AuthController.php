@@ -8,9 +8,12 @@ use App\Http\Requests\Auth\ChangePassword as ChangePasswordRequest;
 use App\Http\Requests\Auth\Forgot as ForgotRequest;
 use App\Mail\Forgot as ForgotMail;
 use App\Repositories\User\User as UserRepository;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Laravel\Passport\RefreshTokenRepository;
 
 
 class AuthController extends Controller
@@ -47,6 +50,15 @@ class AuthController extends Controller
 
         $user->setPassword($request->password);
         $user->clearConfirmToken();
+
+        return response(['success' => true]);
+    }
+
+    public function logout(RefreshTokenRepository $refreshTokenRepository, Request $request): Response
+    {
+        $token = $request->user()->token();
+        $token->revoke();
+        $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($token->id);
 
         return response(['success' => true]);
     }

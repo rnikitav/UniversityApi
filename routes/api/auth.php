@@ -11,6 +11,11 @@ Route::name('auth.')->prefix('auth')->middleware('throttle')->group(function () 
         'uses' => '\App\Http\Controllers\Auth\AuthController@changePassword',
         'as' => 'change-password',
     ]);
+    Route::post('logout', [
+        'uses' => '\App\Http\Controllers\Auth\AuthController@logout',
+        'as' => 'logout',
+        'middleware' => 'auth:api'
+    ]);
     Route::post('token', [
         'uses' => '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken',
         'as' => 'token',
