@@ -3,12 +3,14 @@
 namespace App\Models\User;
 
 use App\Models\Accelerator\Accelerator;
+use App\Models\Accelerator\Case\AcceleratorCase;
 use App\Services\User\MainData as MainDataService;
 use App\Services\User\SyncRoles as SyncRolesService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -26,6 +28,7 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @property Collection $roles
  * @property Collection $accelerators
+ * @property Collection $favorites
  * @property UserMainData $mainData
  * @property array $mainDataForUpdate
  *
@@ -100,5 +103,10 @@ class User extends Authenticatable
     public function accelerators(): HasMany
     {
         return $this->hasMany(Accelerator::class, 'user_id', 'id');
+    }
+
+    public function favoriteCases(): MorphToMany
+    {
+        return $this->morphedByMany(AcceleratorCase::class, 'subject', 'user_favorites');
     }
 }
