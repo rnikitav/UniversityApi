@@ -25,6 +25,6 @@ class File extends JsonResource
     {
         return $this->resource->disk == 'public'
             ? Storage::disk('public')->url($this->resource->path)
-            : sprintf('/api/file/%1$s', $this->resource->sha256);
+            : sprintf('/api/file/%1$s/%2$s', $this->resource->id, $this->resource->sha256);
     }
 }

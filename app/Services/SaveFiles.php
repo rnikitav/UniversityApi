@@ -25,7 +25,9 @@ class SaveFiles
                 if ($attachment instanceof UploadedFile) {
                     $saved[] = $fileService->save($attachment);
                 } elseif ($attachment instanceof FilesDTO) {
-                    $fileService->category($attachment->category);
+                    $fileService
+                        ->category($attachment->category)
+                        ->disk($attachment->disk);
                     $saved[] = $fileService->save($attachment->file);
                 }
             } catch (Exception $exception) {

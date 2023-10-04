@@ -23,7 +23,7 @@ trait DeleteOldFiles
         if (method_exists($model, 'needDeleteOldFiles') && $model->needDeleteOldFiles()) {
             /** @var FileRepository $repository */
             $repository = app(FileRepository::class);
-            $repository->deleteAllOldFilesByOwnerOwnerIdCategory($this);
+            $repository->deleteAllOldFilesByCategory($this);
         }
     }
 }

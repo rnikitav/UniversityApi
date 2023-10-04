@@ -56,7 +56,7 @@ class FileServiceTest extends TestCase
         $this->assertNotNull($acceleratorFile);
         $this->assertEquals($this->defaultDisk, $acceleratorFile->disk);
         $this->assertEquals('attachments', $acceleratorFile->category);
-        $this->assertEquals('accelerator/' . $this->accelerator->id . '/' . $this->file->getClientOriginalName(), $acceleratorFile->path);
+        $this->assertEquals(1, preg_match(sprintf('/accelerator\/%1$s\/.+\.%2$s/', $this->accelerator->id, $this->file->getClientOriginalExtension()), $acceleratorFile->path));
     }
 
     public function testSaveWithOptions()
@@ -76,7 +76,7 @@ class FileServiceTest extends TestCase
         $this->assertNotNull($acceleratorFile);
         $this->assertEquals($this->defaultDisk, $acceleratorFile->disk);
         $this->assertEquals('test', $acceleratorFile->category);
-        $this->assertEquals('accelerator_files/' . $this->accelerator->id . '/' . $this->file->getClientOriginalName(), $acceleratorFile->path);
+        $this->assertEquals(1, preg_match(sprintf('/accelerator_files\/%1$s\/.+\.%2$s/', $this->accelerator->id, $this->file->getClientOriginalExtension()), $acceleratorFile->path));
     }
 
     public function testIncorrectModelAttribute()

@@ -61,7 +61,7 @@ class FileService
             $to = preg_replace('/\/$/', '', $to);
         }
 
-        $fileName = $as ?? $file->getClientOriginalName();
+        $fileName = $as ?? Str::uuid() . '.' .$file->getClientOriginalExtension();
         $path = $file->storeAs($to, $fileName, $this->disk);
 
         if (!$path) {

@@ -9,19 +9,12 @@ class FilesDTO
 {
     public UploadedFile $file;
     public string $category;
+    public string $disk;
 
-
-    public function __construct(UploadedFile $file, string $category)
+    public function __construct(UploadedFile $file, string $category, string $disk = 'private')
     {
         $this->file = $file;
         $this->category = $category;
+        $this->disk = $disk;
     }
-
-    public static function createDtoFromArrayData(UploadedFile $file, $category): FilesDTO
-    {
-        return new self($file, $category);
-
-    }
-
-
 }
