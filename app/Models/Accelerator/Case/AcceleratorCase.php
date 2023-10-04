@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -20,6 +21,7 @@ use Illuminate\Support\Collection;
  * @property string $description
  * @property integer $status_id
  * @property integer $participation_id
+ * @property Carbon $published_at
  *
  * @property Accelerator $accelerator
  * @property AcceleratorCaseStatus $status
@@ -48,8 +50,12 @@ class AcceleratorCase extends Model
         'description',
         'status_id',
         'participation_id',
+        'published_at',
     ];
     protected $with = ['status', 'participation', 'participants'];
+    protected $casts = [
+        'published_at' => 'datetime'
+    ];
 
     protected array $savingParticipants = [];
 
