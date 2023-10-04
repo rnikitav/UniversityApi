@@ -106,6 +106,11 @@ class AcceleratorCaseSolutionTest extends TestCase
         return $this->getRoute($acceleratorId, $caseId, $id) . '/send-message';
     }
 
+    protected function getRouteChangeStatus(int $acceleratorId = null, int $caseId = null, int $id = null): string
+    {
+        return $this->getRoute($acceleratorId, $caseId, $id) . '/change-status';
+    }
+
     protected function getCreateData(int $pointId = null): array
     {
         return [
@@ -218,7 +223,7 @@ class AcceleratorCaseSolutionTest extends TestCase
         $response->assertUnprocessable();
     }
 
-    public function testUpdateCheckPermission()
+    public function testUpdateStatusCheckPermission()
     {
         $solution = AcceleratorCaseSolutionGenerator::create($this->caseTest, $this->pointTest);
         $user = UserGenerator::createVerified();
@@ -226,42 +231,42 @@ class AcceleratorCaseSolutionTest extends TestCase
 
         $maxScore = $this->pointTest->max_score;
 
-        $response = $this->patchJson($this->getRoute(id: $solution->id), $this->getUpdateData(score: $maxScore));
+        $response = $this->patchJson($this->getRouteChangeStatus(id: $solution->id), $this->getUpdateData(score: $maxScore));
         $response->assertForbidden();
 
         $this->acceleratorTest->update(['user_id' => $user->id]);
 
-        $response = $this->patchJson($this->getRoute(id: $solution->id), $this->getUpdateData(score: $maxScore));
+        $response = $this->patchJson($this->getRouteChangeStatus(id: $solution->id), $this->getUpdateData(score: $maxScore));
         $response->assertOk();
     }
 
-    public function testUpdateCheckScore()
+    public function testUpdateStatusCheckScore()
     {
         $solution = AcceleratorCaseSolutionGenerator::create($this->caseTest, $this->pointTest);
         $this->actingAs($this->userAdmin);
 
         $maxScore = $this->pointTest->max_score;
 
-        $response = $this->patchJson($this->getRoute(id: $solution->id), $this->getUpdateData(score: $maxScore + 1));
+        $response = $this->patchJson($this->getRouteChangeStatus(id: $solution->id), $this->getUpdateData(score: $maxScore + 1));
         $response->assertUnprocessable();
 
-        $response = $this->patchJson($this->getRoute(id: $solution->id), $this->getUpdateData(score: -1));
+        $response = $this->patchJson($this->getRouteChangeStatus(id: $solution->id), $this->getUpdateData(score: -1));
         $response->assertUnprocessable();
     }
 
-    public function testUpdateIncorrect()
+    public function testUpdateStatusIncorrect()
     {
         $solution = AcceleratorCaseSolutionGenerator::create($this->caseTest, $this->pointTest);
         $this->actingAs($this->userAdmin);
 
-        $response = $this->patchJson($this->getRoute(id: $solution->id), Arr::except($this->getUpdateData(), 'status'));
+        $response = $this->patchJson($this->getRouteChangeStatus(id: $solution->id), Arr::except($this->getUpdateData(), 'status'));
         $response->assertUnprocessable();
 
-        $response = $this->patchJson($this->getRoute(id: $solution->id), Arr::except($this->getUpdateData(), 'score'));
+        $response = $this->patchJson($this->getRouteChangeStatus(id: $solution->id), Arr::except($this->getUpdateData(), 'score'));
         $response->assertUnprocessable();
     }
 
-    public function testUpdate()
+    public function testUpdateStatus()
     {
         $solution = AcceleratorCaseSolutionGenerator::create($this->caseTest, $this->pointTest);
         $this->actingAs($this->userAdmin);
@@ -271,7 +276,7 @@ class AcceleratorCaseSolutionTest extends TestCase
         $data = $this->getUpdateData(score: $maxScore);
         $data['message'] = 'test message';
 
-        $response = $this->patchJson($this->getRoute(id: $solution->id), $data);
+        $response = $this->patchJson($this->getRouteChangeStatus(id: $solution->id), $data);
         $response->assertOk()
             ->assertJsonFragment(['id' => $solution->id])
             ->assertJsonStructure($this->itemStructure);
