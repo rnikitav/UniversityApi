@@ -28,6 +28,7 @@ class Permission extends PermissionVendor
         'news.edit' => ['preview' => 'Редактирование новостей', 'guard' => 'api'],
         'student' => ['preview' => 'Обучающийся', 'guard' => 'api'],
         'accelerators.edit' => ['preview' => 'Создание/редактирование акселераторов', 'guard' => 'api'],
+        'expert' => ['preview' => 'Эксперт', 'guard' => 'api'],
     ];
 
     public static function getList(): array
@@ -43,5 +44,10 @@ class Permission extends PermissionVendor
     public static function getPermissionStudent(): string
     {
         return 'student';
+    }
+
+    public static function getPermissionExpert(): string
+    {
+        return 'expert';
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Accelerator;
 
+use App\Http\Resources\Accelerator\CaseMessage as AcceleratorCaseMessageResource;
 use App\Http\Resources\Accelerator\ControlPoint as ControlPointResource;
 use App\Http\Resources\File\File as FileResource;
 use App\Http\Resources\User\UserShort as UserShortResource;
@@ -28,6 +29,7 @@ class Solution extends JsonResource
             'created_at' => ResourceHelpers::formatDateTime($this->resource->created_at),
             'updated_at' => ResourceHelpers::formatDateTime($this->resource->updated_at),
             'attachments' => FileResource::collection($this->resource->files),
+            'messages' => AcceleratorCaseMessageResource::collection($this->resource->messages),
         ];
     }
 }

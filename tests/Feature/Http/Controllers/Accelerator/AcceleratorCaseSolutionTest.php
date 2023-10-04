@@ -7,6 +7,7 @@ use App\Models\Accelerator\AcceleratorControlPoint as AcceleratorControlPointMod
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseRole;
 use App\Models\Accelerator\Case\AcceleratorCaseSolutionStatus;
+use App\Models\Permissions\Permission;
 use App\Models\User\User as UserModel;
 use App\Repositories\Accelerator\Accelerator as AcceleratorRepository;
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -59,6 +60,17 @@ class AcceleratorCaseSolutionTest extends TestCase
                 'original_name',
             ]
         ],
+        'messages' => [
+            '*' => [
+                'id',
+                'user' => [
+                    'id',
+                    'main_data',
+                ],
+                'message',
+                'at',
+            ]
+        ]
     ];
     protected array $postHeaders = [
         'Content-Type' => 'multipart/form-data',
@@ -87,6 +99,11 @@ class AcceleratorCaseSolutionTest extends TestCase
             'id' => $acceleratorId ?? $this->acceleratorTest->id,
             'case_id' => $caseId ?? $this->caseTest->id,
             ]) . ($id ? '/' . $id : '');
+    }
+
+    protected function getRouteSendMessage(int $acceleratorId = null, int $caseId = null, int $id = null): string
+    {
+        return $this->getRoute($acceleratorId, $caseId, $id) . '/send-message';
     }
 
     protected function getCreateData(int $pointId = null): array
@@ -263,6 +280,41 @@ class AcceleratorCaseSolutionTest extends TestCase
 
         $this->assertEquals(AcceleratorCaseSolutionStatus::approved(), $solution->status->id);
         $this->assertEquals($maxScore, $solution->score);
-        $this->assertEquals(1, $this->caseTest->messages->count());
+        $this->assertEquals(1, $solution->messages->count());
+    }
+
+    public function testSendMessageCheckPermission()
+    {
+        $solution = AcceleratorCaseSolutionGenerator::create($this->caseTest, $this->pointTest);
+        $user = UserGenerator::createVerified();
+        $this->actingAs($user);
+
+        $data = ['message' => 'test message'];
+
+        $response = $this->patchJson($this->getRouteSendMessage(id: $solution->id), $data);
+        $response->assertForbidden();
+
+        $user->givePermissionTo(Permission::getPermissionExpert());
+
+        $response = $this->patchJson($this->getRouteSendMessage(id: $solution->id), $data);
+        $response->assertOk();
+    }
+
+    public function testSendMessage()
+    {
+        $solution = AcceleratorCaseSolutionGenerator::create($this->caseTest, $this->pointTest);
+        $user = UserGenerator::createVerified();
+        $user->givePermissionTo(Permission::getPermissionExpert());
+        $this->actingAs($user);
+
+        $data = ['message' => 'test message'];
+
+        $response = $this->patchJson($this->getRouteSendMessage(id: $solution->id), $data);
+        $response->assertOk()
+            ->assertJsonStructure($this->itemStructure);
+
+        $solution->refresh();
+
+        $this->assertEquals(1, $solution->messages->count());
     }
 }

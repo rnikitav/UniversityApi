@@ -32,7 +32,7 @@ class AcceleratorCaseMessageTest extends TestCase
         $message = $case->messages()->create(['user_id' => $user->id, 'message' => 'test']);
 
         $this->assertNotNull($message);
-        $this->assertTrue($message->case->is($case));
+        $this->assertTrue($message->owner->is($case));
         $this->assertTrue($message->user->is($user));
     }
 }

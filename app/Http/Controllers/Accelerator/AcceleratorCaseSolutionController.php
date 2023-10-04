@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Accelerator;
 use App\Exceptions\OperationNotPermittedException;
 use App\Http\Requests\Accelerator\Case\CreateSolution as CreateRequest;
 use App\Http\Requests\Accelerator\Case\UpdateSolution as UpdateRequest;
+use App\Http\Requests\Accelerator\Case\SolutionMessage as SolutionMessageRequest;
 use App\Http\Resources\Accelerator\Solution as SolutionResource;
 use App\Models\Accelerator\Case\AcceleratorCaseSolution;
+use App\Models\Permissions\Permission;
 use App\Utils\DB as DBUtils;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -76,10 +78,26 @@ class AcceleratorCaseSolutionController extends AbstractAcceleratorCaseControlle
             $this->solution->update($data);
 
             if (count($data['messages'])) {
-                $this->case->setMessages($data['messages']);
-                $this->case->update();
+                $this->solution->setMessages($data['messages']);
+                $this->solution->update();
             }
         });
+
+        return response(new SolutionResource($this->solution->refresh()));
+    }
+
+    public function sendMessage(SolutionMessageRequest $request, int $id, int $case_id, int $solution_id): Response
+    {
+        $data = $request->prepareData();
+
+        $this->checkPermissionSendMessage();
+
+        $this->getAcceleratorCase($id, $case_id);
+
+        $this->solution = $this->acceleratorRepository->solutionByIdOr404($this->case, $solution_id);
+
+        $this->solution->setMessages($data['messages']);
+        $this->solution->update();
 
         return response(new SolutionResource($this->solution->refresh()));
     }
@@ -116,6 +134,14 @@ class AcceleratorCaseSolutionController extends AbstractAcceleratorCaseControlle
     {
         $isOwner = $this->currentUser->is($this->accelerator->user);
         if (!$isOwner) {
+            throw new OperationNotPermittedException();
+        }
+    }
+
+    protected function checkPermissionSendMessage(): void
+    {
+        $isExpert = $this->currentUser->hasPermissionTo(Permission::getPermissionExpert());
+        if (!$isExpert) {
             throw new OperationNotPermittedException();
         }
     }

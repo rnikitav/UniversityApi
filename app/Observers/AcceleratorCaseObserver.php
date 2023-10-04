@@ -6,7 +6,6 @@ use App\Mail\Accelerator\CaseCreate as CaseCreateMail;
 use App\Mail\Accelerator\CaseUpdateStatus as CaseUpdateStatusMail;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseStatus;
-use App\Services\Accelerator\CaseMessages;
 use App\Services\Accelerator\CaseParticipants;
 use Exception;
 use Illuminate\Support\Facades\Mail;
@@ -45,6 +44,5 @@ class AcceleratorCaseObserver
     public function saved(AcceleratorCaseModel $instance): void
     {
         CaseParticipants::save($instance);
-        CaseMessages::save($instance);
     }
 }

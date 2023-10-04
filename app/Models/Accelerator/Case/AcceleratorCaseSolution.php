@@ -5,6 +5,7 @@ namespace App\Models\Accelerator\Case;
 use App\Models\Accelerator\AcceleratorControlPoint;
 use App\Models\User\User;
 use App\Traits\HasFiles;
+use App\Traits\HasMessages;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,6 +31,7 @@ use Illuminate\Support\Collection;
  * @property User $author
  * @property AcceleratorCaseSolutionStatus $status
  * @property Collection $files
+ * @property Collection $messages
  *
  * @method static $this first()
  * @method static $this create(array $attributes = [])
@@ -39,7 +41,7 @@ use Illuminate\Support\Collection;
  */
 class AcceleratorCaseSolution extends Model
 {
-    use HasFactory, HasFiles;
+    use HasFactory, HasFiles, HasMessages;
 
     protected $table = 'accelerator_case_solutions';
     protected $fillable = [

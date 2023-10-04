@@ -19,4 +19,5 @@ Route::middleware('auth:api')->group(function () {
 
     Route::apiResource('accelerators/{id}/cases/{case_id}/solutions', AcceleratorCaseSolutionController::class)
         ->except('destroy')->parameters(['solutions' => 'solution_id']);
+    Route::patch('accelerators/{id}/cases/{case_id}/solutions/{solution_id}/send-message', [AcceleratorCaseSolutionController::class, 'sendMessage']);
 });

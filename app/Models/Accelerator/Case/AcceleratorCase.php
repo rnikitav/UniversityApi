@@ -4,6 +4,7 @@ namespace App\Models\Accelerator\Case;
 
 use App\Models\Accelerator\Accelerator;
 use App\Traits\HasFiles;
+use App\Traits\HasMessages;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,7 +39,7 @@ use Illuminate\Support\Collection;
  */
 class AcceleratorCase extends Model
 {
-    use HasFactory, HasFiles;
+    use HasFactory, HasFiles, HasMessages;
 
     protected $table = 'accelerator_cases';
     protected $fillable = [
@@ -50,7 +51,6 @@ class AcceleratorCase extends Model
     protected $with = ['status', 'participation', 'participants'];
 
     protected array $savingParticipants = [];
-    protected array $savingMessages = [];
 
     public function accelerator(): BelongsTo
     {
@@ -70,11 +70,6 @@ class AcceleratorCase extends Model
     public function participants(): HasMany
     {
         return $this->hasMany(AcceleratorCaseParticipant::class, 'case_id', 'id');
-    }
-
-    public function messages(): HasMany
-    {
-        return $this->hasMany(AcceleratorCaseMessage::class, 'case_id', 'id');
     }
 
     public function owner(): HasOne
@@ -106,15 +101,5 @@ class AcceleratorCase extends Model
     public function getParticipants(): array
     {
         return $this->savingParticipants;
-    }
-
-    public function setMessages(array $messages): void
-    {
-        $this->savingMessages = $messages;
-    }
-
-    public function getMessages(): array
-    {
-        return $this->savingMessages;
     }
 }

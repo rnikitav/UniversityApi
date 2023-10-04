@@ -2,14 +2,15 @@
 
 namespace App\Services\Accelerator;
 
-use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
+use Illuminate\Database\Eloquent\Model;
 
 class CaseMessages
 {
-    public static function save(AcceleratorCaseModel $instance): void
+    public static function save(Model $model): void
     {
-        foreach ($instance->getMessages() as $message) {
-            $instance->messages()->create($message);
+        $messages = method_exists($model, 'getMessages') ? $model->getMessages() : [];
+        foreach ($messages as $message) {
+            $model->messages()->create($message);
         }
     }
 }

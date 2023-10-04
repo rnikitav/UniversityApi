@@ -5,20 +5,21 @@ namespace App\Models\Accelerator\Case;
 use App\Models\User\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 
 /**
  * @property integer $id
- * @property integer $case_id
+ * @property integer $owner_id
+ * @property string $owner_type
  * @property integer $user_id
  * @property string $message
  * @property Carbon $created_at
  *
- * @property AcceleratorCase $case
  * @property User $user
+ * @property Model $owner
  *
  * @method static $this first()
  * @method static $this create(array $attributes = [])
@@ -35,9 +36,9 @@ class AcceleratorCaseMessage extends Model
     ];
     protected $with = ['user'];
 
-    public function case(): BelongsTo
+    public function owner(): MorphTo
     {
-        return $this->belongsTo(AcceleratorCase::class);
+        return $this->morphTo();
     }
 
     public function user(): HasOne

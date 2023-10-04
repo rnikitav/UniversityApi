@@ -11,8 +11,11 @@ return new class extends Migration
         Schema::create('accelerator_case_messages', function (Blueprint $table) {
             $table->id();
 
-            $table->unsignedBigInteger('case_id')
-                ->comment('Идентификатор кейса');
+            $table->unsignedInteger('owner_id')
+                ->comment('Идентификатор данных');
+
+            $table->string('owner_type', 255)
+                ->comment('Имя класса для связи');
 
             $table->unsignedBigInteger('user_id')
                 ->comment('Идентификатор пользователя');
@@ -21,11 +24,6 @@ return new class extends Migration
                 ->comment('Сообщение');
 
             $table->timestamps();
-
-            $table->foreign('case_id')
-                ->references('id')
-                ->on('accelerator_cases')
-                ->onDelete('cascade');
 
             $table->foreign('user_id')
                 ->references('id')
