@@ -7,6 +7,7 @@ use App\Http\Resources\File\File as FileResource;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Http\Resources\Accelerator\AcceleratorCaseParticipant as AcceleratorCaseParticipantResource;
 use App\Http\Resources\Accelerator\CaseMessage as AcceleratorCaseMessageResource;
+use App\Utils\Resource as ResourceHelpers;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
@@ -21,6 +22,7 @@ class AcceleratorCase extends JsonResource
             'id' => $this->resource->id,
             'name' => $this->resource->name,
             'description' => $this->resource->description,
+            'published_at' => ResourceHelpers::formatDateTime($this->resource->published_at),
             'status' => new BaseSimpleResource($this->resource->status),
             'participation' => new BaseSimpleResource($this->resource->participation),
             'participants' => AcceleratorCaseParticipantResource::collection($this->resource->participants),

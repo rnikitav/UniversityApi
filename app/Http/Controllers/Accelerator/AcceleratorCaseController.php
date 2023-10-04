@@ -153,6 +153,18 @@ class AcceleratorCaseController extends AbstractAcceleratorCaseController
         return response(new AcceleratorCaseResource($this->case));
     }
 
+    public function publish(int $id, int $case_id): Response
+    {
+        $this->getAcceleratorCase($id, $case_id);
+        $this->checkAcceleratorOwner();
+
+        $this->checkPublish();
+
+        $this->case->update(['published_at' => now()]);
+
+        return response(new AcceleratorCaseResource($this->case->refresh()));
+    }
+
     protected function getLastPoint(): AcceleratorControlPoint
     {
         $lastPoint = $this->accelerator->controlPoints->sortByDesc('date_completion')->first();
@@ -166,6 +178,15 @@ class AcceleratorCaseController extends AbstractAcceleratorCaseController
     {
         $solution = $this->case->solutions->firstWhere('control_point_id', $point->id);
         if (is_null($solution)) {
+            throw new OperationNotPermittedException();
+        }
+    }
+
+    protected function checkPublish(): void
+    {
+        $this->checkSolution($this->getLastPoint());
+
+        if ($this->case->scores->count() == 0) {
             throw new OperationNotPermittedException();
         }
     }

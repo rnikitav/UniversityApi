@@ -36,6 +36,7 @@ class AcceleratorCaseTest extends TestCase
         'id',
         'name',
         'description',
+        'published_at',
         'status' => [
             'id',
             'name',
@@ -138,6 +139,11 @@ class AcceleratorCaseTest extends TestCase
     protected function getRouteSetScore(int $acceleratorId = null, int $id = null): string
     {
         return $this->getRoute($acceleratorId, $id) . '/set-score';
+    }
+
+    protected function getRoutePublish(int $acceleratorId = null, int $id = null): string
+    {
+        return $this->getRoute($acceleratorId, $id) . '/publish';
     }
 
     public function testGetListOwner()
@@ -446,5 +452,46 @@ class AcceleratorCaseTest extends TestCase
         /** @var AcceleratorCaseScore $score */
         $score = $case->scores->first();
         $this->assertEquals(1, $score->messages->count());
+    }
+
+    public function testPublishCheckPermission()
+    {
+        $caseWithScore = AcceleratorCaseGenerator::createWithScore($this->acceleratorTest);
+        $case = AcceleratorCaseGenerator::create($this->acceleratorTest);
+        $point = AcceleratorControlPointGenerator::create($this->acceleratorTest);
+        AcceleratorCaseSolutionGenerator::create($case, $point);
+        AcceleratorCaseSolutionGenerator::create($caseWithScore, $point);
+        $user = UserGenerator::createVerified();
+
+        $this->actingAs($user);
+
+        $response = $this->patchJson($this->getRoutePublish(id: $case->id));
+        $response->assertForbidden();
+
+        $response = $this->patchJson($this->getRoutePublish(id: $caseWithScore->id));
+        $response->assertForbidden();
+
+        $this->acceleratorTest->update(['user_id' => $user->id]);
+
+        $response = $this->patchJson($this->getRoutePublish(id: $case->id));
+        $response->assertForbidden();
+
+        $response = $this->patchJson($this->getRoutePublish(id: $caseWithScore->id));
+        $response->assertOk();
+    }
+
+    public function testPublish()
+    {
+        $case = AcceleratorCaseGenerator::createWithScore($this->acceleratorTest);
+        $point = AcceleratorControlPointGenerator::create($this->acceleratorTest);
+        AcceleratorCaseSolutionGenerator::create($case, $point);
+
+        $this->actingAs($this->userAdmin);
+
+        $response = $this->patchJson($this->getRoutePublish(id: $case->id));
+        $response->assertOk();
+
+        $case->refresh();
+        $this->assertNotNull($case->published_at);
     }
 }

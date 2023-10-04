@@ -36,6 +36,13 @@ abstract class AbstractAcceleratorCaseController extends Controller
         $this->case = $this->acceleratorRepository->caseByIdOr404($this->accelerator, $case_id);
     }
 
+    protected function checkAcceleratorOwner(): void
+    {
+        if ($this->currentUser->isNot($this->accelerator->user)) {
+            throw new OperationNotPermittedException();
+        }
+    }
+
     protected function checkOwners(): void
     {
         if ($this->currentUser->isNot($this->case->owner?->user)
