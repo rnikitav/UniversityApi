@@ -2,6 +2,7 @@
 
 namespace App\Models\Accelerator;
 
+use App\DTO\AcceleratorCaseCompleted as AcceleratorCaseCompletedDTO;
 use App\Models\Accelerator\Case\AcceleratorCaseSolution;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -53,5 +54,18 @@ class AcceleratorControlPoint extends Model
     public function solutions(): HasMany
     {
         return $this->hasMany(AcceleratorCaseSolution::class, 'control_point_id', 'id');
+    }
+
+    public function getCompletedCases(): Collection
+    {
+        $casesHasScore = new Collection();
+        $this->solutions->each(function (AcceleratorCaseSolution $solution) use ($casesHasScore) {
+            if ($solution->case->scores->count() > 0) {
+                $file = $solution->files->first();
+                $casesHasScore->push(AcceleratorCaseCompletedDTO::from(['model' => $solution->case, 'file' => $file]));
+            }
+        });
+
+        return $casesHasScore;
     }
 }

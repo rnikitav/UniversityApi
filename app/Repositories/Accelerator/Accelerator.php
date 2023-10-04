@@ -7,6 +7,7 @@ use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseEvent as AcceleratorCaseEventModel;
 use App\Models\Accelerator\Case\AcceleratorCaseSolution as AcceleratorCaseSolutionModel;
 use App\Repositories\AbstractRepository;
+use Illuminate\Database\Eloquent\Collection;
 
 class Accelerator extends AbstractRepository
 {
@@ -43,5 +44,12 @@ class Accelerator extends AbstractRepository
         }
 
         return $solution;
+    }
+
+    public function withPublishedCases(): Collection
+    {
+        return $this->model->withWhereHas('cases', function ($query) {
+            $query->whereNotNull('published_at');
+        })->get();
     }
 }

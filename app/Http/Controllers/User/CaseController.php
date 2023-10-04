@@ -31,25 +31,18 @@ class CaseController extends Controller
 
         $filtered = new Collection();
         $accelerators->each(function (Accelerator $accelerator) use ($filtered) {
-            /** @var AcceleratorControlPoint $finalPoint */
-            $finalPoint = $accelerator->controlPoints->sortByDesc('date_completion')->first();
-            if (is_null($finalPoint) || !$finalPoint->solutions->count()) {
+            $lastPoint = $accelerator->lastPoint();
+            if (is_null($lastPoint) || !$lastPoint->solutions->count()) {
                 return;
             }
 
-            $casesHasScore = new Collection();
-            $finalPoint->solutions->each(function (AcceleratorCaseSolution $solution) use ($casesHasScore) {
-                if ($solution->case->scores->count() > 0) {
-                    $file = $solution->files->first();
-                    $casesHasScore->push(AcceleratorCaseCompletedDTO::from(['model' => $solution->case, 'file' => $file]));
-                }
-            });
+            $completedCases = $lastPoint->getCompletedCases();
 
-            if ($casesHasScore->count() == 0) {
+            if ($completedCases->count() == 0) {
                 return;
             }
 
-            $filtered->push(AcceleratorDTO::from(['model' => $accelerator, 'cases' => $casesHasScore]));
+            $filtered->push(AcceleratorDTO::from(['model' => $accelerator, 'cases' => $completedCases]));
         });
 
         return response(AcceleratorWithCompleteCases::collection($filtered));

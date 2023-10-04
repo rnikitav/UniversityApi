@@ -70,6 +70,11 @@ class Accelerator extends Model
         return $this->hasMany(AcceleratorControlPoint::class);
     }
 
+    public function lastPoint(): ?AcceleratorControlPoint
+    {
+        return $this->controlPoints->sortByDesc('date_completion')->first();
+    }
+
     public function cases(): HasMany
     {
         return $this->hasMany(AcceleratorCase::class);

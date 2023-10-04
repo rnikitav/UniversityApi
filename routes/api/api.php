@@ -5,6 +5,7 @@ use App\Http\Controllers\Accelerator\AcceleratorCaseSolutionController;
 use App\Http\Controllers\Accelerator\AcceleratorController;
 use App\Http\Controllers\Accelerator\AcceleratorCaseController;
 use App\Http\Controllers\File\FileController;
+use App\Http\Controllers\Shared\ProjectBankController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->group(function () {
@@ -27,4 +28,6 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('file/{id}/{hash}', [FileController::class, 'download']);
     Route::delete('file/{id}/{hash}', [FileController::class, 'destroy']);
+
+    Route::get('project-bank', [ProjectBankController::class, 'index']);
 });
