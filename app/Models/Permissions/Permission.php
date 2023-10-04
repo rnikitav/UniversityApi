@@ -29,6 +29,7 @@ class Permission extends PermissionVendor
         'student' => ['preview' => 'Обучающийся', 'guard' => 'api'],
         'accelerators.edit' => ['preview' => 'Создание/редактирование акселераторов', 'guard' => 'api'],
         'expert' => ['preview' => 'Эксперт', 'guard' => 'api'],
+        'image-collection.edit' => ['preview' => 'Редактирование коллекций изображений', 'guard' => 'api'],
     ];
 
     public static function getList(): array

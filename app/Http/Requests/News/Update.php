@@ -16,8 +16,8 @@ class Update extends CommonRequestHandler
         return [
             'title' => Helpers::$filledString255,
             'body' => Helpers::$filledString,
-            'img_preview' => Helpers::$sometimesFile2mbWebP,
-            'img' => Helpers::$sometimesFile2mbWebP,
+            'img_preview' => Helpers::$sometimesFileImage2mb,
+            'img' => Helpers::$sometimesFileImage2mb,
             'published_at' => Helpers::$filledDate,
         ];
     }

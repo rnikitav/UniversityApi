@@ -16,8 +16,8 @@ class Store extends CommonRequestHandler
         return [
             'title' => Helpers::$requiredString255,
             'body' => Helpers::$requiredString,
-            'img_preview' => Helpers::$requiredFile2mbWebP,
-            'img' => Helpers::$requiredFile2mbWebP,
+            'img_preview' => Helpers::$requiredFileImage2mb,
+            'img' => Helpers::$requiredFileImage2mb,
             'published_at' => Helpers::$filledDate,
         ];
     }
