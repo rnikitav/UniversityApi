@@ -8,6 +8,7 @@ use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseParticipant as AcceleratorCaseParticipantModel;
 use App\Models\Accelerator\Case\AcceleratorCaseEvent as AcceleratorCaseEventModel;
 use App\Models\Accelerator\Case\AcceleratorCaseSolution as AcceleratorCaseSolutionModel;
+use App\Models\Accelerator\Case\AcceleratorCaseScore as AcceleratorCaseScoreModel;
 use App\Models\File as FileModel;
 use Database\Factories\Accelerator\Case\AcceleratorCaseFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -63,6 +64,15 @@ class AcceleratorCase
             ->accelerator($accelerator->id)
             ->has(AcceleratorCaseParticipantModel::factory()->mock($accelerator->user->id), 'participants')
             ->has(AcceleratorCaseSolutionModel::factory()->point($point->id)->mock($accelerator->user->id), 'solutions')
+            ->create();
+    }
+
+    public static function createWithScore(AcceleratorModel $accelerator): AcceleratorCaseModel | Collection
+    {
+        return static::getBaseFactory()
+            ->accelerator($accelerator->id)
+            ->has(AcceleratorCaseParticipantModel::factory()->mock($accelerator->user->id), 'participants')
+            ->has(AcceleratorCaseScoreModel::factory()->mock($accelerator->user->id), 'scores')
             ->create();
     }
 }

@@ -13,6 +13,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('accelerators/{id}/cases', AcceleratorCaseController::class)
         ->except('destroy')->parameters(['cases' => 'case_id']);
     Route::patch('accelerators/{id}/cases/{case_id}/change-status', [AcceleratorCaseController::class, 'updateStatus']);
+    Route::patch('accelerators/{id}/cases/{case_id}/set-score', [AcceleratorCaseController::class, 'setScore']);
 
     Route::apiResource('accelerators/{id}/cases/{case_id}/events', AcceleratorCaseEventController::class)
         ->except('destroy')->parameters(['events' => 'event_id']);

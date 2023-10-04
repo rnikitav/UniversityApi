@@ -5,6 +5,7 @@ namespace Tests\Feature\Http\Controllers\Accelerator;
 use App\Mail\Accelerator\CaseCreate as CaseCreateMail;
 use App\Mail\Accelerator\CaseUpdateStatus as CaseUpdateStatusMail;
 use App\Models\Accelerator\Accelerator as AcceleratorModel;
+use App\Models\Accelerator\Case\AcceleratorCaseScore;
 use App\Models\Accelerator\Case\AcceleratorCaseStatus;
 use App\Models\Permissions\Permission;
 use App\Models\User\User as UserModel;
@@ -15,6 +16,8 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Mail;
 use Tests\Generators\Accelerator\Accelerator as AcceleratorGenerator;
 use Tests\Generators\Accelerator\AcceleratorCase as AcceleratorCaseGenerator;
+use Tests\Generators\Accelerator\AcceleratorControlPoint as AcceleratorControlPointGenerator;
+use Tests\Generators\Accelerator\AcceleratorCaseSolution as AcceleratorCaseSolutionGenerator;
 use Tests\Generators\User as UserGenerator;
 use Tests\TestCase;
 
@@ -104,6 +107,10 @@ class AcceleratorCaseTest extends TestCase
         'Content-Type' => 'multipart/form-data',
         'Accept' => 'application/json'
     ];
+    protected array $scoreData = [
+        'score' => 1,
+        'message' => 'test message'
+    ];
 
     /**
      * @throws BindingResolutionException
@@ -126,6 +133,11 @@ class AcceleratorCaseTest extends TestCase
     protected function getRouteChangeStatus(int $acceleratorId = null, int $id = null): string
     {
         return $this->getRoute($acceleratorId, $id) . '/change-status';
+    }
+
+    protected function getRouteSetScore(int $acceleratorId = null, int $id = null): string
+    {
+        return $this->getRoute($acceleratorId, $id) . '/set-score';
     }
 
     public function testGetListOwner()
@@ -369,5 +381,70 @@ class AcceleratorCaseTest extends TestCase
         Mail::assertSent(function(CaseUpdateStatusMail $mail) use ($case) {
             return $mail->case->is($case);
         });
+    }
+
+    public function testSetScoreCheckPermission()
+    {
+        $case = AcceleratorCaseGenerator::create($this->acceleratorTest);
+        $point = AcceleratorControlPointGenerator::create($this->acceleratorTest);
+        $solution = AcceleratorCaseSolutionGenerator::create($case, $point);
+        $user = UserGenerator::createVerified();
+
+        $this->actingAs($user);
+
+        $response = $this->patchJson($this->getRouteSetScore(id: $case->id), $this->scoreData);
+        $response->assertForbidden();
+
+        $user->givePermissionTo(Permission::getPermissionExpert());
+
+        $response = $this->patchJson($this->getRouteSetScore(id: $case->id), $this->scoreData);
+        $response->assertOk();
+
+        $solution->delete();
+
+        $response = $this->patchJson($this->getRouteSetScore(id: $case->id), $this->scoreData);
+        $response->assertForbidden();
+
+        $point->delete();
+
+        $response = $this->patchJson($this->getRouteSetScore(id: $case->id), $this->scoreData);
+        $response->assertForbidden();
+    }
+
+    public function testSetScoreCheckMaxScore()
+    {
+        $case = AcceleratorCaseGenerator::create($this->acceleratorTest);
+        $point = AcceleratorControlPointGenerator::create($this->acceleratorTest);
+        AcceleratorCaseSolutionGenerator::create($case, $point);
+        $user = UserGenerator::createVerified();
+        $user->givePermissionTo(Permission::getPermissionExpert());
+
+        $this->actingAs($user);
+
+        $data = ['score' => $point->max_score + 1];
+
+        $response = $this->patchJson($this->getRouteSetScore(id: $case->id), $data);
+        $response->assertUnprocessable();
+    }
+
+    public function testSetScore()
+    {
+        $case = AcceleratorCaseGenerator::create($this->acceleratorTest);
+        $point = AcceleratorControlPointGenerator::create($this->acceleratorTest);
+        AcceleratorCaseSolutionGenerator::create($case, $point);
+        $user = UserGenerator::createVerified();
+        $user->givePermissionTo(Permission::getPermissionExpert());
+
+        $this->actingAs($user);
+
+        $response = $this->patchJson($this->getRouteSetScore(id: $case->id), $this->scoreData);
+        $response->assertOk();
+
+        $case->refresh();
+        $this->assertEquals(1, $case->scores->count());
+
+        /** @var AcceleratorCaseScore $score */
+        $score = $case->scores->first();
+        $this->assertEquals(1, $score->messages->count());
     }
 }

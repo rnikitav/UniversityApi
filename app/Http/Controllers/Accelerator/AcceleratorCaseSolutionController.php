@@ -90,7 +90,7 @@ class AcceleratorCaseSolutionController extends AbstractAcceleratorCaseControlle
     {
         $data = $request->prepareData();
 
-        $this->checkPermissionSendMessage();
+        $this->checkIsExpert();
 
         $this->getAcceleratorCase($id, $case_id);
 
@@ -134,14 +134,6 @@ class AcceleratorCaseSolutionController extends AbstractAcceleratorCaseControlle
     {
         $isOwner = $this->currentUser->is($this->accelerator->user);
         if (!$isOwner) {
-            throw new OperationNotPermittedException();
-        }
-    }
-
-    protected function checkPermissionSendMessage(): void
-    {
-        $isExpert = $this->currentUser->hasPermissionTo(Permission::getPermissionExpert());
-        if (!$isExpert) {
             throw new OperationNotPermittedException();
         }
     }

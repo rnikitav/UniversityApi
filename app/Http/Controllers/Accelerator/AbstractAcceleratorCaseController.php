@@ -44,4 +44,12 @@ abstract class AbstractAcceleratorCaseController extends Controller
             throw new OperationNotPermittedException();
         }
     }
+
+    protected function checkIsExpert(): void
+    {
+        $isExpert = $this->currentUser->hasPermissionTo(Permission::getPermissionExpert());
+        if (!$isExpert) {
+            throw new OperationNotPermittedException();
+        }
+    }
 }

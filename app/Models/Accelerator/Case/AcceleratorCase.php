@@ -29,6 +29,7 @@ use Illuminate\Support\Collection;
  * @property Collection $messages
  * @property Collection $events
  * @property Collection $solutions
+ * @property Collection $scores
  * @property AcceleratorCaseParticipant $owner
  *
  * @method static $this first()
@@ -86,6 +87,11 @@ class AcceleratorCase extends Model
     public function solutions(): HasMany
     {
         return $this->hasMany(AcceleratorCaseSolution::class, 'case_id', 'id');
+    }
+
+    public function scores(): HasMany
+    {
+        return $this->hasMany(AcceleratorCaseScore::class, 'case_id', 'id');
     }
 
     public function canEditable(): bool
