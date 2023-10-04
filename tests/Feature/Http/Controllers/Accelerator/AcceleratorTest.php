@@ -3,6 +3,7 @@
 namespace Tests\Feature\Http\Controllers\Accelerator;
 
 use App\Models\Accelerator\Accelerator as AcceleratorModel;
+use App\Models\Tags\Tag as TagModel;
 use App\Models\Accelerator\AcceleratorControlPoint;
 use App\Models\Accelerator\AcceleratorStatus;
 use App\Models\User\User as UserModel;
@@ -13,6 +14,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Tests\Generators\Accelerator\Accelerator as AcceleratorGenerator;
 use Tests\Generators\User as UserGenerator;
+use Tests\Generators\Tag as TagGenerator;
 use Tests\TestCase;
 
 /**
@@ -25,6 +27,7 @@ class AcceleratorTest extends TestCase
 
     protected UserModel $userAdmin;
     protected AcceleratorModel $acceleratorTest;
+    protected TagModel $tagTest;
     protected AcceleratorRepository $acceleratorRepository;
     protected array $itemStructure = [
         'id',
@@ -37,6 +40,7 @@ class AcceleratorTest extends TestCase
             'id',
             'name',
         ],
+        'image_main',
         'attachments' => [
             '*' => [
                 'category',
@@ -51,6 +55,12 @@ class AcceleratorTest extends TestCase
                 'date_completion',
                 'max_score',
             ]
+        ],
+        'tags' => [
+            '*' => [
+                'id',
+                'name',
+            ]
         ]
     ];
     protected array $itemListStructure = [
@@ -62,18 +72,6 @@ class AcceleratorTest extends TestCase
             'name',
         ]
     ];
-    protected array $minimalCreateData = [
-         'name' => 'test',
-         'date_end_accepting' => '2022-07-30',
-         'date_end' => '2022-12-15',
-         'control_points' => [
-             [
-                 'name' => 'test point',
-                 'date_completion' => '2022-12-10',
-                 'max_score' => 10,
-             ]
-         ],
-     ];
     protected array $postHeaders = [
         'Content-Type' => 'multipart/form-data',
         'Accept' => 'application/json'
@@ -88,6 +86,7 @@ class AcceleratorTest extends TestCase
         $this->seed();
         $this->userAdmin = UserModel::first();
         $this->acceleratorTest = AcceleratorGenerator::createFull($this->userAdmin);
+        $this->tagTest = TagGenerator::createWithCollection();
 
         $this->acceleratorRepository = app()->make(AcceleratorRepository::class);
     }
@@ -101,6 +100,26 @@ class AcceleratorTest extends TestCase
     protected function getRoute(int $id = null): string
     {
         return route('accelerators.index') . ($id ? '/' . $id : '');
+    }
+
+    protected function getRequestData(): array
+    {
+        return [
+            'name' => 'test',
+            'date_end_accepting' => '2022-07-30',
+            'date_end' => '2022-12-15',
+            'control_points' => [
+                [
+                    'name' => 'test point',
+                    'date_completion' => '2022-12-10',
+                    'max_score' => 10,
+                ]
+            ],
+            'tags' => [
+                ['id' => $this->tagTest->id]
+            ],
+            'image_main' => $this->tagTest->imageCollections->first()?->files?->first()?->id,
+        ];
     }
 
     public function testGetList()
@@ -144,12 +163,12 @@ class AcceleratorTest extends TestCase
         $user = UserGenerator::createVerified();
         $this->actingAs($user);
 
-        $response = $this->post($this->getRoute(), $this->minimalCreateData, $this->postHeaders);
+        $response = $this->post($this->getRoute(), $this->getRequestData(), $this->postHeaders);
         $response->assertForbidden();
 
         $user->givePermissionTo('accelerators.edit');
 
-        $response = $this->post($this->getRoute(), $this->minimalCreateData, $this->postHeaders);
+        $response = $this->post($this->getRoute(), $this->getRequestData(), $this->postHeaders);
         $response->assertOk();
     }
 
@@ -167,7 +186,7 @@ class AcceleratorTest extends TestCase
     {
         $this->actingAs($this->userAdmin);
 
-        $response = $this->post($this->getRoute(), $this->minimalCreateData, $this->postHeaders);
+        $response = $this->post($this->getRoute(), $this->getRequestData(), $this->postHeaders);
         $response->assertOk()
             ->assertJsonStructure($this->itemStructure);
 
@@ -176,13 +195,14 @@ class AcceleratorTest extends TestCase
         $this->assertNotNull($acceleratorModel);
         $this->assertEquals(AcceleratorStatus::notPublished(), $acceleratorModel->status->id);
         $this->assertTrue($this->userAdmin->is($acceleratorModel->user));
+        $this->assertCount(1, $acceleratorModel->tags);
     }
 
     public function testCreateAcceptApplications()
     {
         $this->actingAs($this->userAdmin);
 
-        $data = array_merge($this->minimalCreateData, ['published_at' => now()->format('Y-m-d')]);
+        $data = array_merge($this->getRequestData(), ['published_at' => now()->format('Y-m-d')]);
 
         $response = $this->post($this->getRoute(), $data, $this->postHeaders);
         $response->assertOk()
@@ -197,17 +217,24 @@ class AcceleratorTest extends TestCase
     public function testCreateIncorrect()
     {
         $this->actingAs($this->userAdmin);
+        $data = $this->getRequestData();
 
-        $response = $this->post($this->getRoute(), Arr::except($this->minimalCreateData, 'name'), $this->postHeaders);
+        $response = $this->post($this->getRoute(), Arr::except($data, 'name'), $this->postHeaders);
         $response->assertUnprocessable();
 
-        $response = $this->post($this->getRoute(), Arr::except($this->minimalCreateData, 'date_end_accepting'), $this->postHeaders);
+        $response = $this->post($this->getRoute(), Arr::except($data, 'date_end_accepting'), $this->postHeaders);
         $response->assertUnprocessable();
 
-        $response = $this->post($this->getRoute(), Arr::except($this->minimalCreateData, 'date_end'), $this->postHeaders);
+        $response = $this->post($this->getRoute(), Arr::except($data, 'date_end'), $this->postHeaders);
         $response->assertUnprocessable();
 
-        $response = $this->post($this->getRoute(), Arr::except($this->minimalCreateData, 'control_points'), $this->postHeaders);
+        $response = $this->post($this->getRoute(), Arr::except($data, 'control_points'), $this->postHeaders);
+        $response->assertUnprocessable();
+
+        $response = $this->post($this->getRoute(), Arr::except($data, 'tags'), $this->postHeaders);
+        $response->assertUnprocessable();
+
+        $response = $this->post($this->getRoute(), Arr::except($data, 'image_main'), $this->postHeaders);
         $response->assertUnprocessable();
     }
 

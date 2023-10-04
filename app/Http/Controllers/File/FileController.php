@@ -6,6 +6,7 @@ use App\Events\FileDeleting;
 use App\Exceptions\OperationNotPermittedException;
 use App\Http\Controllers\Controller;
 use App\Repositories\File\FileRepository;
+use Exception;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -34,9 +35,13 @@ class FileController extends Controller
             throw new OperationNotPermittedException();
         }
 
-        $deleted = $file->delete();
-        if ($deleted) {
-            FileDeleting::dispatch($file);
+        try {
+            $deleted = $file->delete();
+            if ($deleted) {
+                FileDeleting::dispatch($file);
+            }
+        } catch (Exception $exception) {
+            $deleted = false;
         }
 
         return response(['status' => $deleted]);

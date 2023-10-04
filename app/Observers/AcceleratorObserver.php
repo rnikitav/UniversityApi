@@ -25,6 +25,7 @@ class AcceleratorObserver
     public function saved(AcceleratorModel $instance): void
     {
         ControlPoints::save($instance);
+        $instance->tags()->sync($instance->getTags());
     }
 
 }

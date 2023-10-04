@@ -19,6 +19,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $created_at
  *
  * @property Collection $files
+ * @property Collection $tags
  *
  * @method static $this first()
  * @method static $this create(array $attributes = [])

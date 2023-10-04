@@ -8,4 +8,5 @@ return [
     'undefined_participant' => 'Участник кейса не найден.',
     'exists_participant' => 'Участник уже находится в кейсе.',
     'score_more' => 'Указан слишком большой балл.',
+    'invalid_file' => 'Выбран некорректный файл в поле :field.',
 ];

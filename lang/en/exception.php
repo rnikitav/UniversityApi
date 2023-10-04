@@ -8,4 +8,5 @@ return [
     'undefined_participant' => 'Case participant not found.',
     'exists_participant' => 'The participant is already in the case.',
     'score_more' => 'The score is too high.',
+    'invalid_file' => 'Выбран некорректный файл в поле :field.',
 ];

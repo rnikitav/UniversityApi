@@ -44,8 +44,7 @@ class AcceleratorController extends Controller
      */
     public function store(CreateRequest $request): Response
     {
-        $data = $request->only(Helpers::keysRules($request));
-        $data['user_id'] = $request->user()->id;
+        $data = $request->prepareData();
 
         $new = DBUtils::inTransaction(function () use ($data) {
             /** @var AcceleratorModel $new */
@@ -53,6 +52,7 @@ class AcceleratorController extends Controller
                 ->make()
                 ->fill($data);
             $new->setControlPoints($data['control_points'] ?? []);
+            $new->setTags($data['tags']);
             $new->setAttachments($data['files'] ?? []);
             $new->save();
 
