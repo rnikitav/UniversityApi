@@ -5,19 +5,20 @@ namespace App\Http\Controllers\Accelerator;
 use App\Exceptions\OperationNotPermittedException;
 use App\Http\Requests\Accelerator\Case\CreateSolution as CreateRequest;
 use App\Http\Requests\Accelerator\Case\UpdateSolution as UpdateRequest;
+use App\Http\Requests\Accelerator\Case\UpdateSolutionStatus as UpdateSolutionStatusRequest;
 use App\Http\Requests\Accelerator\Case\SolutionMessage as SolutionMessageRequest;
 use App\Http\Resources\Accelerator\Solution as SolutionResource;
 use App\Models\Accelerator\Case\AcceleratorCaseSolution;
-use App\Models\Permissions\Permission;
+use App\Models\Accelerator\Case\AcceleratorCaseSolutionStatus;
 use App\Utils\DB as DBUtils;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 use Throwable;
 
 class AcceleratorCaseSolutionController extends AbstractAcceleratorCaseController
 {
     protected ?AcceleratorCaseSolution $solution;
-//    protected ?AcceleratorCaseParticipant $processedParticipant;
 
     public function index(int $id, int $case_id): Response
     {
@@ -70,14 +71,39 @@ class AcceleratorCaseSolutionController extends AbstractAcceleratorCaseControlle
         $this->solution = $this->acceleratorRepository->solutionByIdOr404($this->case, $solution_id);
         $this->checkPermissionUpdate();
 
-        if (array_key_exists('score', $data) && $data['score'] > $this->solution->controlPoint->max_score) {
-            throw new UnprocessableEntityHttpException(__('exception.score_more'));
+        DBUtils::inTransaction(function () use ($data) {
+            $this->solution->setAttachments($data['files'] ?? []);
+            $this->solution->update($data);
+        });
+
+        return response(new SolutionResource($this->solution->refresh()));
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function updateStatus(UpdateSolutionStatusRequest $request, int $id, int $case_id, int $solution_id): Response
+    {
+        $data = $request->prepareData();
+
+        $this->getAcceleratorCase($id, $case_id);
+
+        $this->solution = $this->acceleratorRepository->solutionByIdOr404($this->case, $solution_id);
+        $this->checkPermissionUpdateStatus($data['status_id']);
+
+        $isOwner = $this->currentUser->is($this->accelerator->user);
+        if ($isOwner) {
+            if (array_key_exists('score', $data) && $data['score'] > $this->solution->controlPoint->max_score) {
+                throw new UnprocessableEntityHttpException(__('exception.score_more'));
+            }
+        } else {
+            Arr::forget($data, 'score');
         }
 
-        DBUtils::inTransaction(function () use ($data) {
+        DBUtils::inTransaction(function () use ($data, $isOwner) {
             $this->solution->update($data);
 
-            if (count($data['messages'])) {
+            if ($isOwner && count($data['messages'])) {
                 $this->solution->setMessages($data['messages']);
                 $this->solution->update();
             }
@@ -132,9 +158,31 @@ class AcceleratorCaseSolutionController extends AbstractAcceleratorCaseControlle
 
     protected function checkPermissionUpdate(): void
     {
-        $isOwner = $this->currentUser->is($this->accelerator->user);
-        if (!$isOwner) {
+        if (!$this->solution->canEditable()) {
             throw new OperationNotPermittedException();
         }
+    }
+
+    protected function checkPermissionUpdateStatus(string $newStatus): void
+    {
+        if ($this->currentUser->is($this->accelerator->user)) {
+            if ($newStatus == AcceleratorCaseSolutionStatus::submitted()) {
+                throw new OperationNotPermittedException();
+            }
+            return;
+        }
+
+        if ($this->solution->canEditable()) {
+            if ($newStatus != AcceleratorCaseSolutionStatus::submitted()) {
+                throw new OperationNotPermittedException();
+            }
+            $point = $this->accelerator->controlPoints->find($this->solution->controlPoint->id);
+            if (!$point || now()->isAfter($point->date_completion->endOfDay())) {
+                throw new OperationNotPermittedException();
+            }
+            return;
+        }
+
+        throw new OperationNotPermittedException();
     }
 }

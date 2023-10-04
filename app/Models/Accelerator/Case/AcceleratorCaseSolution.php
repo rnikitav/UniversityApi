@@ -78,4 +78,15 @@ class AcceleratorCaseSolution extends Model
     {
         return $this->status->id == AcceleratorCaseSolutionStatus::approved();
     }
+
+    public function canEditable(): bool
+    {
+        return $this->status->id == AcceleratorCaseSolutionStatus::sentRevision()
+            && $this->case->participants->contains('user_id', request()->user()?->id);
+    }
+
+    public function canDeleteFiles(): bool
+    {
+        return $this->canEditable();
+    }
 }

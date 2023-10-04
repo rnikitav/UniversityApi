@@ -84,10 +84,6 @@ class AcceleratorCaseController extends AbstractAcceleratorCaseController
 
         $this->getAcceleratorCase($id, $case_id);
 
-        if ($this->currentUser->isNot($this->case->owner?->user)) {
-            throw new OperationNotPermittedException();
-        }
-
         if (!$this->case->canEditable()) {
             throw new OperationNotPermittedException();
         }

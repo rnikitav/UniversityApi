@@ -96,7 +96,8 @@ class AcceleratorCase extends Model
 
     public function canEditable(): bool
     {
-        return $this->status->id == AcceleratorCaseStatus::sentRevision();
+        return $this->status->id == AcceleratorCaseStatus::sentRevision()
+            && request()->user()?->is($this->owner?->user);
     }
 
     public function setParticipants(array $participants): void
@@ -107,5 +108,10 @@ class AcceleratorCase extends Model
     public function getParticipants(): array
     {
         return $this->savingParticipants;
+    }
+
+    public function canDeleteFiles(): bool
+    {
+        return $this->canEditable();
     }
 }

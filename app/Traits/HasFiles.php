@@ -44,4 +44,9 @@ trait HasFiles
     {
         return false;
     }
+
+    public function canDeleteFiles(): bool
+    {
+        return false;
+    }
 }

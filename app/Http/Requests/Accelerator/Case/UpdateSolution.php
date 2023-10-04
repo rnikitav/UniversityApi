@@ -2,12 +2,9 @@
 
 namespace App\Http\Requests\Accelerator\Case;
 
-use App\Models\Accelerator\Case\AcceleratorCaseEventStatus;
-use App\Models\Accelerator\Case\AcceleratorCaseSolutionStatus;
 use App\Rules\Helpers;
 use App\Utils\Helpers as UtilsHelpers;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Arr;
 
 class UpdateSolution extends FormRequest
 {
@@ -19,27 +16,15 @@ class UpdateSolution extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => Helpers::$requiredString .'|exists:accelerator_case_solution_statuses,id|not_in:' . AcceleratorCaseSolutionStatus::submitted(),
-            'score' => 'integer|min:0|required_if:status,' . AcceleratorCaseSolutionStatus::approved(),
-            'message' => Helpers::$filledString,
+            'description' => Helpers::$requiredString,
+            'files' => Helpers::$filledArray,
+            'files.*' => Helpers::$requiredFile20mb
         ];
     }
 
     public function prepareData(): array
     {
-        $data = $this->only(UtilsHelpers::keysRules($this));
-        $data['status_id'] = Arr::pull($data, 'status');
-        if ($data['status_id'] != AcceleratorCaseSolutionStatus::approved()) {
-            Arr::pull($data, 'score');
-        }
-        $data['messages'] = [];
-        if (array_key_exists('message', $data) && $data['message']) {
-            $data['messages'][] = [
-                'message' => $data['message'],
-                'user_id' => $this->user()?->id
-            ];
-        }
-        return $data;
+        return $this->only(UtilsHelpers::keysRules($this));
     }
 }
 
