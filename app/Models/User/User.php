@@ -28,7 +28,7 @@ use Spatie\Permission\Traits\HasRoles;
  *
  * @property Collection $roles
  * @property Collection $accelerators
- * @property Collection $favorites
+ * @property Collection $favoriteCases
  * @property UserMainData $mainData
  * @property array $mainDataForUpdate
  *
