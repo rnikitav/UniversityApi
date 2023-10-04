@@ -1,24 +1,29 @@
 <?php
 
+use App\Http\Controllers\Auth\AuthController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Passport\Http\Controllers\AccessTokenController;
 
 Route::name('auth.')->prefix('auth')->middleware('throttle')->group(function () {
-    Route::post('forgot', [
-        'uses' => '\App\Http\Controllers\Auth\AuthController@forgot',
-        'as' => 'forgot',
-    ]);
-    Route::post('change-password', [
-        'uses' => '\App\Http\Controllers\Auth\AuthController@changePassword',
-        'as' => 'change-password',
-    ]);
-    Route::post('logout', [
-        'uses' => '\App\Http\Controllers\Auth\AuthController@logout',
-        'as' => 'logout',
-        'middleware' => 'auth:api'
-    ]);
-    Route::post('token', [
-        'uses' => '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken',
-        'as' => 'token',
-    ]);
+    
+    Route::post('login', [AuthController::class, 'login'])
+        ->name('login');
+    
+    Route::get('refresh', [AuthController::class, 'refresh'])
+        ->name('refresh');
+    
+    Route::middleware('auth:api')
+        ->post('logout', [AuthController::class, 'logout'])
+        ->name('logout');
+    
+    Route::post('forgot', [AuthController::class, 'forgot'])
+        ->name('forgot');
+    
+    Route::post('change-password', [AuthController::class, 'changePassword'])
+        ->name('change-password');
+    
+    Route::post('token', [AccessTokenController::class, "issueToken"])
+        ->name('token');
+    
 });
 
