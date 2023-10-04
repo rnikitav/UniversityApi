@@ -25,7 +25,7 @@ class Create extends FormRequest
         ];
 
         if (count($this->image_collections)) {
-            $rules['image_collections.*.id'] = 'required|integer|exists:image_collection,id';
+            $rules['image_collections.*.id'] = 'required|integer|exists:image_collections,id';
         }
 
         return $rules;
@@ -34,8 +34,15 @@ class Create extends FormRequest
     public function prepareData(): array
     {
         $data = $this->only(UtilsHelpers::keysRules($this));
-        $data['image_collections'] = Arr::pluck($data['image_collections'], 'id');
+        $data['image_collections'] = Arr::pluck($this->image_collections, 'id');
         return $data;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if (is_null($this->image_collections)) {
+            $this->image_collections = [];
+        }
     }
 }
 

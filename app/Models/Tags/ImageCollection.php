@@ -30,7 +30,7 @@ class ImageCollection extends Model
 {
     use HasFactory, HasFiles;
 
-    protected $table = 'image_collection';
+    protected $table = 'image_collections';
 
     protected $fillable = [
         'name',

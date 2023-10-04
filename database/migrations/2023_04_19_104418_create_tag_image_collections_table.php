@@ -26,7 +26,7 @@ return new class extends Migration
 
             $table->foreign('image_collection_id')
                 ->references('id')
-                ->on('tags');
+                ->on('image_collections');
         });
     }
 
