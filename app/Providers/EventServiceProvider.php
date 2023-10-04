@@ -7,8 +7,10 @@ use App\Listeners\DeleteFile;
 use App\Models\Accelerator\Accelerator;
 use App\Models\Accelerator\Case\AcceleratorCase;
 use App\Models\Accelerator\Case\AcceleratorCaseEvent;
+use App\Models\Accelerator\Case\AcceleratorCaseSolution;
 use App\Observers\AcceleratorCaseEventObserver;
 use App\Observers\AcceleratorCaseObserver;
+use App\Observers\AcceleratorCaseSolutionObserver;
 use App\Observers\AcceleratorObserver;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -24,6 +26,7 @@ class EventServiceProvider extends ServiceProvider
         Accelerator::class => [AcceleratorObserver::class],
         AcceleratorCase::class => [AcceleratorCaseObserver::class],
         AcceleratorCaseEvent::class => [AcceleratorCaseEventObserver::class],
+        AcceleratorCaseSolution::class => [AcceleratorCaseSolutionObserver::class],
     ];
 
     public function shouldDiscoverEvents(): bool

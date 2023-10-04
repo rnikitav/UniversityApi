@@ -32,7 +32,7 @@ class AcceleratorTest extends TestCase
         parent::setUp();
         $this->seed();
         $this->userAdmin = UserModel::first();
-        $this->acceleratorTest = AcceleratorGenerator::create($this->userAdmin);
+        $this->acceleratorTest = AcceleratorGenerator::createWithControlPoint($this->userAdmin);
 
         $this->acceleratorRepository = app()->make(AcceleratorRepository::class);
     }
@@ -56,5 +56,17 @@ class AcceleratorTest extends TestCase
         $this->acceleratorRepository->eventByIdOr404($case, 0);
 
         $this->assertNotNull($this->acceleratorRepository->eventByIdOr404($case, $event->id));
+    }
+
+    public function testGetSolutionByIdOr404()
+    {
+        $point = $this->acceleratorTest->controlPoints->first();
+        $case = AcceleratorCaseGenerator::createWithSolution($this->acceleratorTest, $point);
+        $solution = $case->solutions->first();
+
+        $this->expectException(NotFoundHttpException::class);
+        $this->acceleratorRepository->solutionByIdOr404($case, 0);
+
+        $this->assertNotNull($this->acceleratorRepository->solutionByIdOr404($case, $solution->id));
     }
 }

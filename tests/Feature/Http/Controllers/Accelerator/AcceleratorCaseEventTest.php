@@ -82,13 +82,6 @@ class AcceleratorCaseEventTest extends TestCase
             ]) . ($id ? '/' . $id : '');
     }
 
-    /*
-    protected function getRouteChangeStatus(int $acceleratorId = null, int $id = null): string
-    {
-        return $this->getRoute($acceleratorId, $id) . '/change-status';
-    }
-    */
-
     protected function getMinimalCreateData(string $type = null, int $participantId = null): array
     {
         $data = [

@@ -12,6 +12,13 @@ class AcceleratorControlPointFactory extends Factory
         return [];
     }
 
+    public function accelerator(int $id): AcceleratorControlPointFactory
+    {
+        return $this->state(fn (array $attributes) => [
+            'accelerator_id' => $id,
+        ]);
+    }
+
     public function mock(): AcceleratorControlPointFactory
     {
         return $this->state(fn (array $attributes) => [

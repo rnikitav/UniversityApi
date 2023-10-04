@@ -5,6 +5,7 @@ namespace App\Repositories\Accelerator;
 use App\Models\Accelerator\Accelerator as AcceleratorModel;
 use App\Models\Accelerator\Case\AcceleratorCase as AcceleratorCaseModel;
 use App\Models\Accelerator\Case\AcceleratorCaseEvent as AcceleratorCaseEventModel;
+use App\Models\Accelerator\Case\AcceleratorCaseSolution as AcceleratorCaseSolutionModel;
 use App\Repositories\AbstractRepository;
 
 class Accelerator extends AbstractRepository
@@ -32,5 +33,15 @@ class Accelerator extends AbstractRepository
         }
 
         return $event;
+    }
+
+    public function solutionByIdOr404(AcceleratorCaseModel $case, int $solutionId): AcceleratorCaseSolutionModel
+    {
+        $solution = $case->solutions()->where('id', $solutionId)->get()->first();
+        if (is_null($solution)) {
+            abort(404);
+        }
+
+        return $solution;
     }
 }

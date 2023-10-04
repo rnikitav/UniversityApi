@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 /**
  * @property integer $id
@@ -28,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property AcceleratorControlPoint $controlPoint
  * @property User $author
  * @property AcceleratorCaseSolutionStatus $status
+ * @property Collection $files
  *
  * @method static $this first()
  * @method static $this create(array $attributes = [])
@@ -67,6 +69,11 @@ class AcceleratorCaseSolution extends Model
 
     public function status(): HasOne
     {
-        return $this->hasOne(AcceleratorCaseEventStatus::class, 'id', 'status_id');
+        return $this->hasOne(AcceleratorCaseSolutionStatus::class, 'id', 'status_id');
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status->id == AcceleratorCaseSolutionStatus::approved();
     }
 }
