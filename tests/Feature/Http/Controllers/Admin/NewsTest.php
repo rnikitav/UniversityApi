@@ -14,6 +14,10 @@ use Tests\Generators\News as NewsGenerator;
 use Tests\Generators\User as UserGenerator;
 use Tests\TestCase;
 
+/**
+ * @group admin
+ * @group news
+ */
 class NewsTest extends TestCase
 {
     use RefreshDatabase;
@@ -28,12 +32,12 @@ class NewsTest extends TestCase
         'body',
         'slug',
         'files' =>[
-        '*' => [
-            'category',
-            'path',
-            'original_name',
-        ]
-    ],
+            '*' => [
+                'category',
+                'path',
+                'original_name',
+            ]
+        ],
         'published_at',
         'created_at',
         'updated_at',

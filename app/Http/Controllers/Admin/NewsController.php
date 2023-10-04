@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\News\Store;
 use App\Http\Requests\News\Update;
-use App\Http\Resources\News\NewsCollectionResource;
+use App\Http\Resources\News\NewsResourceCollection;
 use App\Http\Resources\News\NewsResource;
 use App\Models\News\News;
 use App\Models\News\News as NewsModel;
@@ -35,7 +35,7 @@ class NewsController extends Controller
             ? $this->newsRepository->paginate($perPage)
             : $this->newsRepository->all();
 
-        return response(new NewsCollectionResource($items));
+        return response(new NewsResourceCollection($items));
     }
 
     /**
