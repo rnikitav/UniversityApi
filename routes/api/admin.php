@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\ImageCollectionController;
 use App\Http\Controllers\Admin\PermissionsController;
 use App\Http\Controllers\Admin\RolesController;
+use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Admin\NewsController;
 use Illuminate\Support\Facades\Route;
@@ -13,5 +14,6 @@ Route::name('admin.')->prefix('admin')->group(function () {
     Route::apiResource('users', UsersController::class)->parameters(['users' => 'id']);
     Route::apiResource('news', NewsController::class)->parameters(['news' => 'id']);
     Route::apiResource('image-collections', ImageCollectionController::class)->parameters(['image-collections' => 'id']);
+    Route::apiResource('tags', TagsController::class)->parameters(['tags' => 'id']);
 });
 

@@ -2,9 +2,6 @@
 
 namespace App\Models\Tags;
 
-use App\Models\Permissions\Permission;
-use App\Models\User\User;
-use App\Traits\HasFiles;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +15,7 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property Carbon $created_at
  *
- * @property Collection $files
+ * @property Collection $imageCollections
  *
  * @method static $this first()
  * @method static $this create(array $attributes = [])
@@ -26,27 +23,18 @@ use Illuminate\Support\Carbon;
  * @mixin Builder
  * @mixin QueryBuilder
  */
-class ImageCollection extends Model
+class Tag extends Model
 {
-    use HasFactory, HasFiles;
+    use HasFactory;
 
-    protected $table = 'image_collection';
+    protected $table = 'tags';
 
     protected $fillable = [
         'name',
     ];
 
-    protected $with = ['files'];
-
-    public function canDeleteFiles(): bool
+    public function imageCollections(): BelongsToMany
     {
-        /** @var User $currentUser */
-        $currentUser = request()->user();
-        return $currentUser->hasAnyPermission(['image-collection.edit', Permission::getPermissionAdministrator()]);
-    }
-
-    public function tags(): BelongsToMany
-    {
-        return $this->belongsToMany(Tag::class, 'tag_image_collections');
+        return $this->belongsToMany(ImageCollection::class, 'tag_image_collections');
     }
 }
